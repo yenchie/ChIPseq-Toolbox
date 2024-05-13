@@ -251,76 +251,30 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath) {
     print(enriched.go.annot$Ontology %>% unique())
     write.table(enriched.go.annot, name, sep = "\t", quote = FALSE, row.names = F)
     print(paste("file:", i, "GO term enrichment done"))
-  }
 
-  ## plotting -----
-  p1 <- NULL
-  d1 <- NULL
-  if (!is.na(name)) {
-    d1 <-
-      read.delim(
-        name,
-        stringsAsFactors = F
-      ) %>% arrange(FDR)
-    colnames(d1)
-    print(d1$Ontology %>% unique())
-    p1 <- d1 %>%
-      na.omit() %>%
-      mutate(log10.qval = -log10(FDR)) %>%
-      filter(!log10.qval %>% is.infinite()) %>%
-      group_by(Ontology) %>%
-      top_n(10, wt = log10.qval) %>%
-      ungroup() %>%
-      mutate(
-        Description = Description %>% str_wrap(width = 40),
-        GeneRatio = geneHits * 100 / pathGenes
-      ) %>%
-      ggplot(aes(
-        x = GeneRatio,
-        y = reorder(Description, GeneRatio),
-        colour = log10.qval %>% round(1),
-        size = geneHits
-      )) +
-      geom_point() +
-      scale_size(range = c(6, 16)) +
-      scale_color_gradient(low = "blue", high = "red") +
-      expand_limits(x = 0) +
-      labs(
-        x = "GeneRatio (%) ",
-        # the fraction of genes-of-interest found in the gene set.
-        y = "GO term",
-        colour = "-log10.qval",
-        size = "Count"
-      ) +
-      theme(axis.text.y = element_text(face = "bold", size = 12.5, vjust = 0.5)) +
-      facet_wrap(~Ontology, scales = "free_y", ncol = 2)
 
-    print(paste(
-      "output:",
-      file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id", "_dotplot_top10_terms.pdf")))
-    ))
-
-    ggsave(
-      filename = paste0(i %>% basename() %>% str_replace("\\.id", "_dotplot_top10_terms.pdf")),
-      plot = p1,
-      path = file.path(datapath, "output", "plot"),
-      width = 16,
-      height = 16
-    )
-
-    # complete go term plot
-    d2 <- NULL
-    for (ont in d1$Ontology %>% unique()) {
-      d2 <- d1 %>% # na.omit()%>%
-        filter(Ontology == ont) %>%
+    ## plotting -----
+    p1 <- NULL
+    d1 <- NULL
+    if (!is.na(name)) {
+      d1 <-
+        read.delim(
+          name,
+          stringsAsFactors = F
+        ) %>% arrange(FDR)
+      colnames(d1)
+      print(d1$Ontology %>% unique())
+      p1 <- d1 %>%
+        na.omit() %>%
         mutate(log10.qval = -log10(FDR)) %>%
         filter(!log10.qval %>% is.infinite()) %>%
+        group_by(Ontology) %>%
+        top_n(10, wt = log10.qval) %>%
+        ungroup() %>%
         mutate(
           Description = Description %>% str_wrap(width = 40),
           GeneRatio = geneHits * 100 / pathGenes
-        )
-
-      p2 <- d2 %>%
+        ) %>%
         ggplot(aes(
           x = GeneRatio,
           y = reorder(Description, GeneRatio),
@@ -332,40 +286,87 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath) {
         scale_color_gradient(low = "blue", high = "red") +
         expand_limits(x = 0) +
         labs(
-          title = paste("GO:", ont),
           x = "GeneRatio (%) ",
           # the fraction of genes-of-interest found in the gene set.
           y = "GO term",
           colour = "-log10.qval",
           size = "Count"
         ) +
-        theme(axis.text.y = element_text(
-          face = "bold", size = 12.5, vjust =
-            0.5
-        ))
+        theme(axis.text.y = element_text(face = "bold", size = 12.5, vjust = 0.5)) +
+        facet_wrap(~Ontology, scales = "free_y", ncol = 2)
 
       print(paste(
         "output:",
-        file.path(datapath, "output", "plot", paste0(ont, "_", i %>% basename() %>% str_replace("\\.id", "_dotplot_all_terms.pdf")))
+        file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id", "_dotplot_top10_terms.pdf")))
       ))
 
-      if (length(d2$category %>% unique()) < 20) {
-        zoom <- 1
-      } else {
-        zoom <- length(d2$category %>% unique()) / 20
-      }
       ggsave(
-        filename = paste0(ont, "_", i %>% basename() %>% str_replace("\\.id", "_dotplot_all_terms.pdf")),
-        plot = p2,
+        filename = paste0(i %>% basename() %>% str_replace("\\.id", "_dotplot_top10_terms.pdf")),
+        plot = p1,
         path = file.path(datapath, "output", "plot"),
-        width = 10,
-        height = 12 * zoom,
-        limitsize = FALSE
+        width = 16,
+        height = 16
       )
+
+      # complete go term plot
+      d2 <- NULL
+      for (ont in d1$Ontology %>% unique()) {
+        d2 <- d1 %>% # na.omit()%>%
+          filter(Ontology == ont) %>%
+          mutate(log10.qval = -log10(FDR)) %>%
+          filter(!log10.qval %>% is.infinite()) %>%
+          mutate(
+            Description = Description %>% str_wrap(width = 40),
+            GeneRatio = geneHits * 100 / pathGenes
+          )
+
+        p2 <- d2 %>%
+          ggplot(aes(
+            x = GeneRatio,
+            y = reorder(Description, GeneRatio),
+            colour = log10.qval %>% round(1),
+            size = geneHits
+          )) +
+          geom_point() +
+          scale_size(range = c(6, 16)) +
+          scale_color_gradient(low = "blue", high = "red") +
+          expand_limits(x = 0) +
+          labs(
+            title = paste("GO:", ont),
+            x = "GeneRatio (%) ",
+            # the fraction of genes-of-interest found in the gene set.
+            y = "GO term",
+            colour = "-log10.qval",
+            size = "Count"
+          ) +
+          theme(axis.text.y = element_text(
+            face = "bold", size = 12.5, vjust =
+              0.5
+          ))
+
+        print(paste(
+          "output:",
+          file.path(datapath, "output", "plot", paste0(ont, "_", i %>% basename() %>% str_replace("\\.id", "_dotplot_all_terms.pdf")))
+        ))
+
+        if (length(d2$category %>% unique()) < 20) {
+          zoom <- 1
+        } else {
+          zoom <- length(d2$category %>% unique()) / 20
+        }
+        ggsave(
+          filename = paste0(ont, "_", i %>% basename() %>% str_replace("\\.id", "_dotplot_all_terms.pdf")),
+          plot = p2,
+          path = file.path(datapath, "output", "plot"),
+          width = 10,
+          height = 12 * zoom,
+          limitsize = FALSE
+        )
+      }
+    } else {
+      print(paste("No GO terms were enriched in the file:", i))
     }
-  } else {
-    print(paste("No GO terms were enriched in the file:", i))
   }
-  print(paste(i, "finished"))
+
   Sys.sleep(5)
 }
