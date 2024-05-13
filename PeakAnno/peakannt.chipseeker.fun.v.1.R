@@ -1,6 +1,8 @@
 ## peakannt.chipseeker.fun.v.1.R
 # author: YCW
 # date:2024.03.19
+# revised: 2024.05.13
+# reviser: YCW
 
 library(dplyr)
 library(stringr)
