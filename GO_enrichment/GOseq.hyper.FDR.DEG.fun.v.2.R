@@ -66,7 +66,6 @@ print(file.path(source.path %>% list.files("GOseq.ego.fun.v.1.R", full.names = T
 source(file.path(source.path %>% list.files("GOseq.ego.fun.v.1.R", full.names = T)))
 
 GOseq.hyper.FDR.DEG.fun <- function(datapath) {
-  rm(list = ls())
   require(goseq)
   require(dplyr)
   require(stringr)
@@ -208,7 +207,7 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath) {
     q.cut.of <- 0.05
     BP <- GO.seq.ego(pwf, GO_BP, termfile = termfile, 0.05)
     outpath <- file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id", paste0("_DAG.BP", q.cut.of, ".pdf"))))
-    DAG.GOseq.fun(BP$ego, GO_BP, "BP", termfile, de.genes$V1, 0.05, outpath)
+    DAG.GOseq.fun(GOseq.result = BP$ego, GO_DB = GO_BP, GO.ontology = "BP", termfile, GOI.list = de.genes$V1, q.cut.off = 0.05, outpath = outpath)
 
     CC <- GO.seq.ego(pwf, GO_CC, termfile = termfile, 0.05)
     outpath <- file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id", paste0("_DAG.CC", q.cut.of, ".pdf"))))
@@ -367,4 +366,6 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath) {
   } else {
     print(paste("No GO terms were enriched in the file:", i))
   }
+  print(paste(i, "finished"))
+  Sys.sleep(5)
 }

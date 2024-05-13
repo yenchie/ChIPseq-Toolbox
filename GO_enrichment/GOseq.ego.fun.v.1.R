@@ -123,10 +123,10 @@ GO.seq.ego <- function(pwf, GO_DB, termfile = termfile, q.cut.off) {
             distinct() %>%
             mutate(
                 GeneRatio = paste(geneHits, GOIs, sep = "/"),
-                BgRatio = paste(pathGenes, genes %>% length(), sep = "/")
+                BgRatio = paste(pathGenes, genes, sep = "/")
             ) %>%
             as.data.frame()
-        head(enriched.ego.annot.1)
+        # head(enriched.ego.annot.1)
 
         enriched.ego.annot.1 <- enriched.ego.annot.1[order(enriched.ego.annot.1$FDR), ]
         head(enriched.ego.annot.1)
@@ -157,12 +157,15 @@ DAG.GOseq.fun <- function(GOseq.result, GO_DB, GO.ontology, termfile, GOI.list, 
     head(GOseq.result)
     colnames(GO_DB) <- c("geneID", "ID", "Ontology")
     head(GO_DB)
-    genes <- GO_DB[, 1] %>% unique()
-    print(genes %>% length())
+    genes <- GO_DB[, 1] %>%
+        unique() %>%
+        length()
+    print(genes)
 
     GOIs <- length(which(GOI.list %in% genes))
     print(GOIs)
 
+    # GOseq.result %>% head()
     GOseq.result.1 <- GOseq.result %>%
         # na.omit() %>%
         dplyr::rename(ID = category, FDR = qval, geneHits = numDEInCat, pathGenes = numInCat, pvalue = over_represented_pvalue) %>%
@@ -177,9 +180,10 @@ DAG.GOseq.fun <- function(GOseq.result, GO_DB, GO.ontology, termfile, GOI.list, 
         distinct() %>%
         mutate(
             GeneRatio = paste(geneHits, GOIs, sep = "/"),
-            BgRatio = paste(pathGenes, genes %>% length(), sep = "/")
+            BgRatio = paste(pathGenes, genes, sep = "/")
         ) %>%
-        as.data.frame()
+        as.data.frame() %>%
+        dplyr::select("ID", "pvalue", "geneHits", "term", "FDR", "Genes", "GeneRatio", "BgRatio")
 
     nrow(GOseq.result.1)
     GOseq.result.1$Genes %>% head()
@@ -190,7 +194,7 @@ DAG.GOseq.fun <- function(GOseq.result, GO_DB, GO.ontology, termfile, GOI.list, 
         qvalueCutoff = q.cut.off,
         pAdjustMethod = "BH",
         keyColname = "ID",
-        pathGenes = "pathGenes",
+        # pathGenes = "pathGenes",
         geneColname = "Genes",
         geneHits = "geneHits",
         geneRatioColname = "GeneRatio",
@@ -205,9 +209,8 @@ DAG.GOseq.fun <- function(GOseq.result, GO_DB, GO.ontology, termfile, GOI.list, 
     enrich_res@ontology <- GO.ontology
     enrich_res@universe <- GO_DB$geneID %>% unique()
     enrich_res@geneSets <- split(GO_DB$geneID, GO_DB$ID)
-    enrich_res
     print(outpath)
     pdf(outpath)
-    enrich_res %>% plotGOgraph()
+    enrich_res %>% plotGOgraph(useFullNames = TRUE)
     dev.off()
 }
