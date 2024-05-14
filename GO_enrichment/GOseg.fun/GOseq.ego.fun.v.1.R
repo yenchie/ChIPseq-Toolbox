@@ -7,12 +7,20 @@
 # GOseq.hyper.FDR.DEG.fun.v.2.R
 ###############
 
-source.path <- getCurrentFileLocation()
+# source.path <- getCurrentFileLocation()
+require(goseq)
+require(dplyr)
+require(stringr)
+require(tidyr)
+require(GO.db)
+require(ggplot2)
+
+source.path <- "/bcst/JYL/JYL_qnap_2/YCWang/0_Script/000/Toolbox/GO_enrichment"
 print(source.path)
-print(file.path(source.path %>% list.files("jamenrich-enrichdf2er.R", full.names = T)))
-source(file.path(source.path %>% list.files("jamenrich-enrichdf2er.R", full.names = T)))
-print(file.path(source.path %>% list.files("jamenrich-import.R", full.names = T)))
-source(file.path(source.path %>% list.files("jamenrich-import.R", full.names = T)))
+print(file.path(source.path %>% list.dirs() %>% list.files("jamenrich-enrichdf2er.R", full.names = T)))
+source(file.path(source.path %>% list.dirs() %>% list.files("jamenrich-enrichdf2er.R", full.names = T)))
+print(file.path(source.path %>% list.dirs() %>% list.files("jamenrich-import.R", full.names = T)))
+source(file.path(source.path %>% list.dirs() %>% list.files("jamenrich-import.R", full.names = T)))
 
 GO.seq.ego <- function(pwf, GO_DB, termfile = termfile, q.cut.off) {
     termfile <- termfile

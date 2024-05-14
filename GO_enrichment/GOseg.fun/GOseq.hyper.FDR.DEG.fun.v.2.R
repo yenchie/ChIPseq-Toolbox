@@ -47,33 +47,34 @@ if (!require("goseq", quietly = TRUE)) {
   BiocManager::install("goseq")
 }
 ########################################
+require(goseq)
+require(dplyr)
+require(stringr)
+require(tidyr)
+require(GO.db)
+require(ggplot2)
 
-getCurrentFileLocation <- function() {
-  this_file <- commandArgs() %>%
-    tibble::enframe(name = NULL) %>%
-    tidyr::separate(col = value, into = c("key", "value"), sep = "=", fill = "right") %>%
-    dplyr::filter(key == "--file") %>%
-    dplyr::pull(value)
-  if (length(this_file) == 0) {
-    this_file <- rstudioapi::getSourceEditorContext()$path
-  }
-  return(dirname(this_file))
-}
 
-source.path <- getCurrentFileLocation()
+# getCurrentFileLocation <- function() {
+#   this_file <- commandArgs() %>%
+#     tibble::enframe(name = NULL) %>%
+#     tidyr::separate(col = value, into = c("key", "value"), sep = "=", fill = "right") %>%
+#     dplyr::filter(key == "--file") %>%
+#     dplyr::pull(value)
+#   if (length(this_file) == 0) {
+#     this_file <- rstudioapi::getSourceEditorContext()$path
+#   }
+#   return(dirname(this_file))
+# }
+
+
+# source.path <- getCurrentFileLocation()
+source.path <- "/bcst/JYL/JYL_qnap_2/YCWang/0_Script/000/Toolbox/GO_enrichment"
 print(source.path)
-print(file.path(source.path %>% list.files("GOseq.ego.fun.v.1.R", full.names = T)))
-source(file.path(source.path %>% list.files("GOseq.ego.fun.v.1.R", full.names = T)))
+print(file.path(source.path %>% list.dirs() %>% list.files("GOseq.ego.fun.v.1.R", full.names = T)))
+source((source.path %>% list.dirs() %>% list.files("GOseq.ego.fun.v.1.R", full.names = T)))
 
 GOseq.hyper.FDR.DEG.fun <- function(datapath) {
-  require(goseq)
-  require(dplyr)
-  require(stringr)
-  require(tidyr)
-  require(GO.db)
-  require(ggplot2)
-
-
   # read all the table.
   featurepath <- "/bcst/JYL/JYL_qnap/WHHsieh/GO_enrichment/GO_input"
   all.genes <- read.table(file.path(featurepath, "Ro_v3.genelength.txt"), sep = "\t", stringsAsFactors = FALSE, header = FALSE)
