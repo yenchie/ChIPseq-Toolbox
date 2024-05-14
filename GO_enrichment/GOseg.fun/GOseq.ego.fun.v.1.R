@@ -14,13 +14,14 @@ require(stringr)
 require(tidyr)
 require(GO.db)
 require(ggplot2)
+require(clusterProfiler)
 
-source.path <- "/bcst/JYL/JYL_qnap_2/YCWang/0_Script/000/Toolbox/GO_enrichment"
-print(source.path)
-print(file.path(source.path %>% list.dirs() %>% list.files("jamenrich-enrichdf2er.R", full.names = T)))
-source(file.path(source.path %>% list.dirs() %>% list.files("jamenrich-enrichdf2er.R", full.names = T)))
-print(file.path(source.path %>% list.dirs() %>% list.files("jamenrich-import.R", full.names = T)))
-source(file.path(source.path %>% list.dirs() %>% list.files("jamenrich-import.R", full.names = T)))
+# source.path <- "/bcst/JYL/JYL_qnap_2/YCWang/0_Script/000/Toolbox/GO_enrichment"
+# print(source.path)
+# print(file.path(source.path %>% list.dirs() %>% list.files("jamenrich-enrichdf2er.R", full.names = T)))
+# source(file.path(source.path %>% list.dirs() %>% list.files("jamenrich-enrichdf2er.R", full.names = T)))
+# print(file.path(source.path %>% list.dirs() %>% list.files("jamenrich-import.R", full.names = T)))
+# source(file.path(source.path %>% list.dirs() %>% list.files("jamenrich-import.R", full.names = T)))
 
 GO.seq.ego <- function(pwf, GO_DB, termfile = termfile, q.cut.off) {
     termfile <- termfile
@@ -146,9 +147,6 @@ GO.seq.ego <- function(pwf, GO_DB, termfile = termfile, q.cut.off) {
     }
     return(result)
 }
-
-
-
 DAG.GOseq.fun <- function(GOseq.result, GO_DB, GO.ontology, termfile, GOI.list, q.cut.off, outpath = outpath) {
     print(GO.ontology)
     GO_DB$Ontology %>% unique()

@@ -66,13 +66,12 @@ require(ggplot2)
 #   }
 #   return(dirname(this_file))
 # }
-
-
 # source.path <- getCurrentFileLocation()
-source.path <- "/bcst/JYL/JYL_qnap_2/YCWang/0_Script/000/Toolbox/GO_enrichment"
-print(source.path)
-print(file.path(source.path %>% list.dirs() %>% list.files("GOseq.ego.fun.v.1.R", full.names = T)))
-source((source.path %>% list.dirs() %>% list.files("GOseq.ego.fun.v.1.R", full.names = T)))
+# source.path <- "/bcst/JYL/JYL_qnap_2/YCWang/0_Script/000/Toolbox/GO_enrichment"
+# print(source.path)
+# print(file.path(source.path %>% list.dirs() %>% list.files("GOseq.ego.fun.v.1.R", full.names = T)))
+# source((source.path %>% list.dirs() %>% list.files("GOseq.ego.fun.v.1.R", full.names = T)))
+
 
 GOseq.hyper.FDR.DEG.fun <- function(datapath) {
   # read all the table.
