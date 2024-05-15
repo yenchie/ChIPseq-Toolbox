@@ -29,7 +29,8 @@ install.packages("reshape2")
 
 ## Input:
 - path of sample sheet
-formate: 
+formate:
+
 |SampleID|bamReads|bamControl|Factor|Condition|ControlID|Tissue|Treatment|Replicate|Peaks|PeakCaller|
 |--------|--------|----------|------|---------|---------|------|---------|---------|-----|----------|
 |ABBCC   |bam.path|ctr.bam.path|NA  |NA       |ABBCC.ctr|NA    |NA       |1        |peak.path|macs/narrow/bed|
