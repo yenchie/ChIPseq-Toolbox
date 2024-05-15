@@ -46,6 +46,9 @@ if (!require("BiocManager", quietly = TRUE)) {
 if (!require("goseq", quietly = TRUE)) {
   BiocManager::install("goseq")
 }
+
+
+
 ########################################
 require(goseq)
 require(dplyr)
@@ -340,7 +343,7 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath) {
             size = "Count"
           ) +
           theme(axis.text.y = element_text(
-            face = "bold", size = 12.5, vjust =
+            face = "bold", size = 10, vjust =
               0.5
           ))
 
@@ -358,8 +361,8 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath) {
           filename = paste0(ont, "_", i %>% basename() %>% str_replace("\\.id", "_dotplot_all_terms.pdf")),
           plot = p2,
           path = file.path(datapath, "output", "plot"),
-          width = 10,
-          height = 12 * zoom,
+          width = 12,
+          height = 18 * zoom,
           limitsize = FALSE
         )
       }

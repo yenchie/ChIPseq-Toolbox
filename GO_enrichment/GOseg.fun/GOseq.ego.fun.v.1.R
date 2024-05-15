@@ -8,6 +8,22 @@
 ###############
 
 # source.path <- getCurrentFileLocation()
+if (!require("clusterProfiler", quietly = TRUE)) {
+    BiocManager::install("clusterProfiler")
+}
+
+if (!require("topGO", quietly = TRUE)) {
+    BiocManager::install("topGO")
+}
+
+if (!require("remotes", quietly = TRUE)) {
+    install.packages("remotes")
+}
+if (!require("jamba", quietly = TRUE)) {
+    remotes::install_github("jmw86069/jamba")
+}
+
+
 require(goseq)
 require(dplyr)
 require(stringr)
@@ -164,29 +180,32 @@ DAG.GOseq.fun <- function(GOseq.result, GO_DB, GO.ontology, termfile, GOI.list, 
     colnames(GO_DB) <- c("geneID", "ID", "Ontology")
     head(GO_DB)
     genes <- GO_DB[, 1] %>%
-        unique() %>%
-        length()
-    print(genes)
+        unique()
+    print(genes %>%
+        length())
 
-    GOIs <- length(which(GOI.list %in% genes))
-    print(GOIs)
+    GOIs <- GOI.list[which(GOI.list %in% genes)]
+    print(GOIs %>%
+        length())
 
     # GOseq.result %>% head()
     GOseq.result.1 <- GOseq.result %>%
         # na.omit() %>%
         dplyr::rename(ID = category, FDR = qval, geneHits = numDEInCat, pathGenes = numInCat, pvalue = over_represented_pvalue) %>%
         left_join(GO_DB) %>%
-        filter(geneID %in% GOI.list) %>%
+        filter(geneID %in% GOIs) %>%
         group_by(ID) %>%
         mutate(
-            Genes = paste(geneID, collapse = ",")
+            Genes = paste(geneID %>% unique(), collapse = ",")
         ) %>%
         ungroup() %>%
         dplyr::select(-geneID) %>%
         distinct() %>%
         mutate(
-            GeneRatio = paste(geneHits, GOIs, sep = "/"),
-            BgRatio = paste(pathGenes, genes, sep = "/")
+            GeneRatio = paste(geneHits, GOIs %>%
+                length(), sep = "/"),
+            BgRatio = paste(pathGenes, genes %>%
+                length(), sep = "/")
         ) %>%
         as.data.frame() %>%
         dplyr::select("ID", "pvalue", "geneHits", "term", "FDR", "Genes", "GeneRatio", "BgRatio")
@@ -212,11 +231,16 @@ DAG.GOseq.fun <- function(GOseq.result, GO_DB, GO.ontology, termfile, GOI.list, 
         msigdbGmtT = NULL,
         verbose = FALSE
     )
+    # enrich_res@gene
     enrich_res@ontology <- GO.ontology
     enrich_res@universe <- GO_DB$geneID %>% unique()
-    enrich_res@geneSets <- split(GO_DB$geneID, GO_DB$ID)
+    eGO_DB <- GO_DB %>%
+        filter(ID %in% GOseq.result.1$ID) %>%
+        distinct()
+
+    enrich_res@geneSets <- split(as.character(eGO_DB$geneID), as.character(eGO_DB$ID))
     print(outpath)
     pdf(outpath)
-    enrich_res %>% plotGOgraph(useFullNames = TRUE)
+    enrich_res %>% plotGOgraph(useFullNames = TRUE, .NO.CHAR = 40)
     dev.off()
 }
