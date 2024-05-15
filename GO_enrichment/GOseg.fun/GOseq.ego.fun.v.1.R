@@ -23,6 +23,11 @@ if (!require("jamba", quietly = TRUE)) {
     remotes::install_github("jmw86069/jamba")
 }
 
+if (!require("Rgraphviz", quietly = TRUE)) {
+    BiocManager::install("Rgraphviz")
+}
+
+
 
 require(goseq)
 require(dplyr)

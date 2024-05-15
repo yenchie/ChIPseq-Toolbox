@@ -6,6 +6,47 @@
 ## Description:
 run GO enrichment analysis via [goseq](https://bioconductor.org/packages/goseq/) and plotting.
 
+
+## Dependency:
+[goseq](https://bioconductor.org/packages/goseq/)
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("goseq")
+
+[GO.db](https://bioconductor.org/packages/release/data/annotation/html/GO.db.html)
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("GO.db")
+
+[topGO](https://bioconductor.org/packages/release/bioc/html/topGO.html)
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("topGO")
+
+[Rgraphviz](https://www.bioconductor.org/packages/release/bioc/html/Rgraphviz.html)
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("Rgraphviz")
+
+[clusterProfiler](https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html)
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("clusterProfiler")
+
+install.packages("dplyr")
+install.packages("tidyr")
+install.packages("stringr")
+install.packages("ggplot2")
+
+[jamba](https://rdrr.io/github/jmw86069/jamba/)
+install.packages("remotes")
+remotes::install_github("jmw86069/jamba")
+
 ## Input:
 - Path of gene ID files (suffix of file names should be .id). 
  file format: no header single column list
