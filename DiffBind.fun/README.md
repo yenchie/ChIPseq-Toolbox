@@ -39,9 +39,48 @@ formate:
 ## Output: 
 
 ```
-|output
-|--
-|--|--
+..
+|--output.log
+|--consensus.peak.bed
+|--dba_DBA.RData
+|--dba.count.score.value.boxplot.pdf
+|--DBdata.count.score.cluster.pdf
+|--DBdata.count.libsizes.txt
+|--DBdata.count.score.global_binding_matrix.txt
+|--dba.normalized.value.boxplot.pdf
+|--DBdata.normalized.cluster.LIB-FULL.pdf
+|--pair-wise_peak.number.txt
+|--DBS_matrix
+    |--LIB-FULL
+        |--LIB-FULL_DEseq2_q0pt05_FC2_pair_wise_comparison_matrix.pdf
+        |--LIB-FULL_edgeR_q0pt05_FC2_pair_wise_comparison_matrix.pdf
+        |--LIB-FULL_inBoth_q0pt05_FC2_pair_wise_comparison_matrix.pdf
+        |--pair_wise_matrix_q0pt05.FC2.DEseq2.txt
+        |--pair_wise_matrix_q0pt05.FC2.edgeR.txt
+        |--pair_wise_matrix_q0pt05.FC2.inBoth.txt
+|--DBS_table
+    |--LIB-FULL
+        |--LIB-FULL.[condition1]_[condition2].dba.report_DEseq2.txt
+        |--LIB-FULL.[condition1]_[condition2].dba.report_edgeR.txt
+        |--LIB-FULL.[condition1]_[condition3].dba.report_DEseq2.txt
+         ...
+|--DBS_bed
+    |--LIB-FULL
+        |--DEseq2
+            |--[condition1]_[condition2]_q0pt05.FC2.DEseq2.down.bed
+            |--[condition1]_[condition2]_q0pt05.FC2.DEseq2.up.bed
+            |--[condition1]_[condition3]_q0pt05.FC2.DEseq2.down.bed
+             ...
+        |--edgeR
+            |--[condition1]_[condition2]_q0pt05.FC2.edgeR.down.bed
+            |--[condition1]_[condition2]_q0pt05.FC2.edgeR.up.bed
+            |--[condition1]_[condition3]_q0pt05.FC2.edgeR.down.bed
+             ...
+        |--inBoth
+            |--[condition1]_[condition2]_q0pt05.FC2.inBoth.down.bed
+            |--[condition1]_[condition2]_q0pt05.FC2.inBoth.up.bed
+            |--[condition1]_[condition3]_q0pt05.FC2.inBoth.down.bed
+             ...
 ```
 
 ## Note:
