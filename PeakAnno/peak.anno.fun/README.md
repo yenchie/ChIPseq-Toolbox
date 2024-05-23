@@ -90,12 +90,20 @@ peakAnnoList <-peak.Anno.fun(files, outpath, date, plot = F, output.gene.table =
 ## Example:
 
 ```R
-files.sources <- list.files("./Toolbox/PeakAnno/peak.anno.fun", ".R$",
-    ignore.case = T, full.names = T
+files.sources <- "~/000/Toolbox/PeakAnno/peak.anno.fun"
+sapply(
+    list.files(files.sources,
+        ".R$",
+        ignore.case = T, full.names = T
+    ),
+    source
 )
-sapply(files.sources, source)
-
+load(list.files(files.sources,
+    "\\.Rdata$",
+    ignore.case = T, full.names = T
+))
 ls()
+
 beds.path <- "./DiffBind/output/H3K4me3/q.01/DBS_bed/LIB-FULL/inBoth"
 beds <- beds.path %>% list.files(full.names = T)
 
@@ -106,17 +114,20 @@ print(outpath)
 date = "20240515"
 log_file <- file.path(outpath, "output.log")
 sink(log_file, append = TRUE)
-peakAnnoList <- peak.Anno.fun(files = beds, outpath, date, plot = F, output.gene.table = T)
+peakAnnoList <- peak.Anno.fun(files = beds, outpath, date, plot = F, output.gene.table = T, Txdb=Txdb)
 sink()
 ```
 
 ## Scripts:
 - peakannt.chipseeker.fun.v.1.R
 - plotAnntBar.fun.v.1.R
+- beds2grl.fun.R
+- GOI.genome.browser.R
 
 ## Structure:
 ```R
-peak.Anno.fun(files, outpath, date, plot = F, output.gene.table = T)
+peak.Anno.fun(files, outpath, date, plot = F, output.gene.table = T, Txdb=Txdb)
+    beds2grl(files)
     ChIPseeker::annotatePeak(
         TxDb = txdb,
         tssRegion = c(-1000, -1), # signed your definition for TSS
@@ -129,6 +140,12 @@ peak.Anno.fun(files, outpath, date, plot = F, output.gene.table = T)
 
     plotAnntBar(peakAnnoList)
 
+
+GOI.genome.browser.R(grl = grl, geneID = NULL, seqname = NULL, range = NULL)
+    beds2grl(files)
+    
 ```
+
+
 
 

@@ -1,4 +1,3 @@
-#########################################
 # plotAnntBar.fun.v.1.R
 # author: YCW
 # date: 2024.03.08
@@ -6,18 +5,6 @@
 # revised date:
 # - plot bar plot for percentage of peak feature Distribution
 
-require(dplyr)
-require(stringr)
-require(GenomicFeatures)
-require(ChIPseeker)
-require(DOSE)
-require(ggplot2)
-require(Vennerable)
-# require(ggvenn)
-# require(VennDiagram)
-require(ggpubr)
-require(forcats)
-require(tibble)
 
 plotAnntBar <- function(peakAnnoList) {
   res.peak.annt <- NULL
@@ -103,3 +90,4 @@ plotAnntBar <- function(peakAnnoList) {
     coord_flip() +
     guides(fill = guide_legend(reverse = TRUE))
 }
+# fin -----

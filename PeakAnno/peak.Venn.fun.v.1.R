@@ -3,11 +3,21 @@
 # 2024.05.15
 # 2024.04.22
 
+# USAGE
+# source("/bcst/JYL/JYL_qnap_2/YCWang/0_Script/000/Toolbox/PeakAnno/peak.Venn.fun.v.1.R")
+# beds.path <- "./beds"
+# beds <- data.frame(path = beds.path %>% list.files(full.names = T, "bed"), ID = LETTERS[seq( from = 1, to = length(beds.path %>% list.files(full.names = T, "bed")))] )
+# beds
+# outpath <- "./"
+
+# date = "20240515"
+# peak.venn(files = beds, outpath, date)
+
 
 library(ChIPpeakAnno)
 library(tidyverse)
 
-peak.venn <- function(files, outpath, date) {
+peak.venn <- function(files, outpath, date, colors=NULL) {
     print(outpath)
     ## input -----
     if (!is.data.frame(files)) {
@@ -57,11 +67,11 @@ peak.venn <- function(files, outpath, date) {
     length(grl)
     names(grl)
 
-    promoter <- getPromoters(TxDb = txdb, upstream = 1000, downstream = 0) # signed your definition of promoter
-    options(ChIPseeker.downstreamDistance = 0)
-    # grl1 <- grl[which(lengths(grl) != 0)]
-
     grl1 <- grl
+    if(colors=NULL){
+        colors = rainbow(length(grl1))
+    }
+
     print(file.path(outpath, paste0("peak.venn.", date, ".pdf")))
     pdf(file.path(outpath, paste0("peak.venn.", date, ".pdf")))
     tryCatch(
@@ -70,9 +80,9 @@ peak.venn <- function(files, outpath, date) {
                 NameOfPeaks = c(names(grl1)),
                 scaled = FALSE, euler.d = FALSE, totalTest = lengths(grl1) %>% max(),
                 connectedPeaks = "keepAll",
-                fill = rainbow(length(grl1)), # circle fill color
-                col = rainbow(length(grl1)), # circle border color
-                cat.col = rainbow(length(grl1))
+                fill = colors, # circle fill color
+                col = colors, # circle border color
+                cat.col = colors
             )
         },
         error = function(e) {
