@@ -86,7 +86,7 @@ remotes::install_github("jmw86069/jamba")
 - GO_Biological_Process.txt
 
 - Gmax189
-- RO_v.3 (currently)
+- RO_v.3 
 
 ## Usage: 
 
@@ -97,13 +97,23 @@ GOseq.hyper.FDR.DEG.fun(datapath)
 ## Example:
 
 ```R
-files.sources <- list.files("/Toolbox/GO_enrichment/GOseg.fun", ".R$", ignore.case = T, full.names = T)
+files.sources <- list.files("~/Toolbox/GO_enrichment/GOseg.fun", ".R$", ignore.case = T, full.names = T)
 sapply(files.sources, source)
-datapath <- "./testing/GO_enrichment/RO_test.Data"
+datapath <- "./"
+GO.path <- "./GO_ALL.txt"
+# formate: col1: geneID; col2: GOID; col3: Ontology
+# example: gene1    GO:000001   BP
+
+termfile.path <- "./GOterm47229.txt"
+# formate: col1: GOID; col2: Description; col3: Ontology
+# example: GO:000001    mitochondrion inheritance   BP
+
+all.genes.path <- "./genelength"
+# formate: col1: geneID; col2: length
 
 log_file <- file.path(datapath, "output.log")
 sink(log_file, append = TRUE)
-GOseq.hyper.FDR.DEG.fun(datapath)
+GOseq.hyper.FDR.DEG.fun(datapath, GO.path, termfile.path, all.genes.path)
 sink()
 ```
 
@@ -115,7 +125,7 @@ sink()
 
 ## Structure:
 ```R
-GOseq.hyper.FDR.DEG.fun(datapath)
+GOseq.hyper.FDR.DEG.fun(datapath, GO.path, termfile.path, all.genes.path)
     GO.seq.ego(pwf, GO_DB, termfile = termfile, q.cut.off)
     DAG.GOseq.fun(GOseq.result, GO_DB, GO.ontology, termfile, GOI.list, q.cut.off, outpath = outpath)
         enrichDF2enrichResult()

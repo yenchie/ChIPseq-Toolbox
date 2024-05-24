@@ -76,74 +76,47 @@ require(ggplot2)
 # source((source.path %>% list.dirs() %>% list.files("GOseq.ego.fun.v.1.R", full.names = T)))
 
 
-GOseq.hyper.FDR.DEG.fun <- function(datapath) {
+GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.path) {
   # read all the table.
-  featurepath <- "/bcst/JYL/JYL_qnap/WHHsieh/GO_enrichment/GO_input"
-  all.genes <- read.table(file.path(featurepath, "Ro_v3.genelength.txt"), sep = "\t", stringsAsFactors = FALSE, header = FALSE)
+  all.genes <- read.table(all.genes.path, sep = "\t", stringsAsFactors = FALSE, header = FALSE)
+  colnames(all.genes) <- c("geneID", "length")
   head(all.genes)
   nrow(all.genes)
-  length(all.genes$V1 %>% unique())
+  length(all.genes$geneID %>% unique())
 
-  GO_BP <- read.table(file.path(featurepath, "Ro_protein_v3_Go47229_BiologicalProcess.txt"), sep = "\t", stringsAsFactors = FALSE) %>%
-    mutate(Ontology = "BP")
-  head(GO_BP)
-  nrow(GO_BP)
-  length(GO_BP$V1 %>% unique())
-  length(GO_BP$V2 %>% unique())
-  GO_MF <- read.table(file.path(featurepath, "Ro_protein_v3_Go47229_MolecularFunction.txt"), sep = "\t", stringsAsFactors = FALSE) %>%
-    mutate(Ontology = "MF")
-  head(GO_MF)
-  nrow(GO_MF)
-  length(GO_MF$V1 %>% unique())
-  length(GO_MF$V2 %>% unique())
-  GO_CC <- read.table(file.path(featurepath, "Ro_protein_v3_Go47229_CellularComponent.txt"), sep = "\t", stringsAsFactors = FALSE) %>%
-    mutate(Ontology = "CC")
-  head(GO_CC)
-  nrow(GO_CC)
-  length(GO_CC$V1 %>% unique())
-  length(GO_CC$V2 %>% unique())
-
-  GO_ALL <- GO_BP %>%
-    bind_rows(GO_MF) %>%
-    bind_rows(GO_CC)
-  colnames(GO_ALL) <- c("geneID", "ID", "Ontology")
+  GO_ALL <- read.table(GO.path, sep = "\t", stringsAsFactors = FALSE)
   head(GO_ALL)
-  nrow(GO_ALL)
-  length(GO_ALL$geneID %>% unique())
-  length(GO_ALL$ID %>% unique()) # 5,717
+  colnames(GO_ALL) <- c("geneID", "ID", "Ontology")
 
-  GO_ALL %>%
-    group_by(ID) %>%
-    dplyr::count(Ontology)
-  length(GO_BP$geneID %>% unique()) + length(GO_MF$geneID %>% unique()) + length(GO_CC$geneID %>% unique())
-  length(GO_BP$ID %>% unique()) + length(GO_MF$ID %>% unique()) + length(GO_CC$ID %>% unique())
-
-
-  type2Ont <- data.frame(
-    V3 = c("P", "F", "C"),
-    Ontology = c("BP", "MF", "CC")
-  )
-  termfile <- read.table(file.path(featurepath, "GOterm47229.txt"), sep = "\t", stringsAsFactors = FALSE, header = FALSE, fill = TRUE, quote = "") %>% left_join(type2Ont)
-  colnames(termfile) <- c("ID", "Description", "Ont", "note", "Ontology")
+  termfile <- read.table(termfile.path, sep = "\t", stringsAsFactors = FALSE, header = FALSE, fill = TRUE, quote = "")
+  colnames(termfile) <- c("ID", "Description", "Ontology")
   termfile %>% head()
   termfile %>% nrow()
-  length(termfile$V1 %>% unique()) # 47,229
-  which(!GO_ALL$ID %in% termfile$ID) %>% length()
-  which(!(GO_ALL$geneID %>% unique()) %in% (all.genes$V1 %>% unique())) %>% length()
+  length(termfile$V1 %>% unique()) %>% print()
+  which(!GO_ALL$ID %in% termfile$ID) %>%
+    length() %>%
+    print()
+  which(!(GO_ALL$geneID %>% unique()) %in% (all.genes$V1 %>% unique())) %>%
+    length() %>%
+    print()
 
-  setdiff(GO_ALL$geneID, all.genes$V1)
-  setdiff(all.genes$V1, GO_ALL$geneID)
+  setdiff(GO_ALL$geneID, all.genes$geneID) %>% print()
+  setdiff(all.genes$geneID, GO_ALL$geneID) %>% print()
   print(paste("All annotated genes in GO term list", GO_ALL$geneID %>% unique() %>% length()))
   print(paste("All  GO term number", GO_ALL$ID %>% unique() %>% length()))
 
-  print(paste("All annotated genes in BP GO term list", GO_BP$V1 %>% unique() %>% length()))
-  print(paste("All BP GO term number", GO_BP$V2 %>% unique() %>% length()))
+  GO_BP <- GO_ALL %>% filter(Ontology == "BP")
+  GO_MF <- GO_ALL %>% filter(Ontology == "MF")
+  GO_CC <- GO_ALL %>% filter(Ontology == "CC")
 
-  print(paste("All annotated genes in MF GO term list", GO_MF$V1 %>% unique() %>% length()))
-  print(paste("All MF GO term number", GO_MF$V2 %>% unique() %>% length()))
+  print(paste("All annotated genes in BP GO term list", GO_BP$geneID %>% unique() %>% length()))
+  print(paste("All BP GO term number", GO_BP$ID %>% unique() %>% length()))
 
-  print(paste("All annotated genes in CC GO term list", GO_CC$V1 %>% unique() %>% length()))
-  print(paste("All CC GO term number", GO_CC$V2 %>% unique() %>% length()))
+  print(paste("All annotated genes in MF GO term list", GO_MF$geneID %>% unique() %>% length()))
+  print(paste("All MF GO term number", GO_MF$ID %>% unique() %>% length()))
+
+  print(paste("All annotated genes in CC GO term list", GO_CC$geneID %>% unique() %>% length()))
+  print(paste("All CC GO term number", GO_CC$ID %>% unique() %>% length()))
 
   # query.GO <- GO_ALL %>%
   #     left_join(termfile) %>%
