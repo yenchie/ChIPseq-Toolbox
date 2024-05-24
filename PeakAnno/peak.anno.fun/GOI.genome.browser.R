@@ -88,9 +88,12 @@ GOI.genome.browser <- function(grl = grl, geneID = NULL, seqname = NULL, range =
     }
 
     peakset.plot.df <- p.d1 %>%
+        rownames_to_column("order") %>%
         mutate(o.ID = ifelse(name == "transcript",
             paste(transcript.ID, seqnames, start, end, sep = "__"),
-            paste(seqnames, start, end, sep = "__")
+            ifelse(name == "gene", paste(seqnames, start, end, sep = "__"),
+                paste(order, seqnames, start, end, sep = "__")
+            )
         )) %>%
         dplyr::select(seqnames, start, end, strand, geneID, transcript.ID, feature, name, Name, alter, o.ID) %>%
         distinct() %>%
@@ -121,7 +124,7 @@ GOI.genome.browser <- function(grl = grl, geneID = NULL, seqname = NULL, range =
     line.width <- data.frame(
         feature = c(names(grl), "gene", "five_prime_UTR", "CDS", "three_prime_UTR", "intron"),
         line.width = c(rep(10, length(grl)), 10, 5, 10, 5, 2),
-        colors = c(rainbow(n = length(grl)), "blue", "#417041", "darkorange", "#10a410", "gray")
+        colors = c(rainbow(n = length(grl)), "blue", "#417041", "#0031c3", "#10a410", "gray")
     )
 
     line.width <- line.width %>% filter(feature %in% unique(peakset.plot.df$feature))
