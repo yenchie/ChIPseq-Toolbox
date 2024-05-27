@@ -246,6 +246,6 @@ DAG.GOseq.fun <- function(GOseq.result, GO_DB, GO.ontology, termfile, GOI.list, 
     enrich_res@geneSets <- split(as.character(eGO_DB$geneID), as.character(eGO_DB$ID))
     print(outpath)
     pdf(outpath)
-    enrich_res %>% plotGOgraph(useFullNames = TRUE, .NO.CHAR = 40)
+    enrich_res %>% plotGOgraph(useFullNames = TRUE, .NO.CHAR = 35)
     dev.off()
 }
