@@ -147,8 +147,8 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
   #     dplyr::select(-c(Ont, note))
 
   ###  genes -----
-  assayed.genes <- all.genes$V1
-  gene.length <- as.integer(all.genes$V2)
+  assayed.genes <- all.genes$geneID
+  gene.length <- as.integer(all.genes$length)
   names(gene.length) <- assayed.genes
 
   ###################################################################
@@ -170,6 +170,7 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
     a <- a + 1
     print(a)
     de.genes <- read.table(i, sep = "\t", stringsAsFactors = FALSE, header = FALSE) %>% distinct()
+    head(de.genes)
     nrow(de.genes)
 
     gene.vector <- as.integer(assayed.genes %in% de.genes$V1)
