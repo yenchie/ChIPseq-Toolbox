@@ -245,7 +245,15 @@ DAG.GOseq.fun <- function(GOseq.result, GO_DB, GO.ontology, termfile, GOI.list, 
 
     enrich_res@geneSets <- split(as.character(eGO_DB$geneID), as.character(eGO_DB$ID))
     print(outpath)
+
     pdf(outpath)
-    enrich_res %>% plotGOgraph(useFullNames = TRUE, .NO.CHAR = 35)
-    dev.off()
+    tryCatch(
+        {
+            enrich_res %>% plotGOgraph(useFullNames = TRUE, .NO.CHAR = 35)
+        },
+        error = function(e) {
+            message("An error occurred: ", e$message)
+        }
+    )
+    dev.off() # Ensure the PDF device is turned off in case of an error
 }
