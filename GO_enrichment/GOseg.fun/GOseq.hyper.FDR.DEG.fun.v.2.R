@@ -92,11 +92,12 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
   colnames(termfile) <- c("ID", "Description", "Ontology")
   termfile %>% head()
   termfile %>% nrow()
-  length(termfile$V1 %>% unique()) %>% print()
-  which(!GO_ALL$ID %in% termfile$ID) %>%
+  length(termfile$ID %>% unique()) %>% print()
+  which(!(GO_ALL$ID %>% unique()) %in% (termfile$ID %>% unique())) %>%
     length() %>%
     print()
-  which(!(GO_ALL$geneID %>% unique()) %in% (all.genes$V1 %>% unique())) %>%
+
+  which(!(GO_ALL$geneID %>% unique()) %in% (all.genes$geneID %>% unique())) %>%
     length() %>%
     print()
 
@@ -118,24 +119,19 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
   print(paste("All annotated genes in CC GO term list", GO_CC$geneID %>% unique() %>% length()))
   print(paste("All CC GO term number", GO_CC$ID %>% unique() %>% length()))
 
-  # query.GO <- GO_ALL %>%
-  #     left_join(termfile) %>%
-  #     dplyr::select(-c(Ont, note)) %>%
-  #     distinct() %>%
-  #     filter(Description %>% is.na()) %>%
-  #     dplyr::select(ID) %>%
-  #     distinct()
-  #   term <- list()
-  #   for (go in query.GO$ID) {
-  #     if (GOTERM[[go]] %>% is.null()) {
-  #       print(paste("non description", go))
-  #       cat("--------------------------------------\n")
-  #     } else {
-  #       term[[go]] <- GOTERM[[go]]
-  #       print(GOTERM[[go]])
-  #       cat("--------------------------------------\n")
-  #     }
+  # query.GO <- setdiff(unique(GO_ALL$ID), unique(termfile$ID))
+
+  # term <- list()
+  # for (go in query.GO) {
+  #   if (GOTERM[[go]] %>% is.null()) {
+  #     print(paste("non description", go))
+  #     cat("--------------------------------------\n")
+  #   } else {
+  #     term[[go]] <- GOTERM[[go]]
+  #     print(GOTERM[[go]])
+  #     cat("--------------------------------------\n")
   #   }
+  # }
 
   #   termfile.1 <- data.frame(
   #     GO = sapply(term, function(x) x@GOID),
