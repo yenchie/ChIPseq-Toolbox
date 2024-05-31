@@ -216,12 +216,12 @@ DAG.GOseq.fun <- function(GOseq.result, GO_DB, GO.ontology, termfile, GOI.list, 
         dplyr::select("ID", "pvalue", "geneHits", "term", "FDR", "Genes", "GeneRatio", "BgRatio")
 
     nrow(GOseq.result.1)
-    GOseq.result.1$Genes %>% head()
-    head(GOseq.result.1)
+    # GOseq.result.1$Genes %>% head()
+    # head(GOseq.result.1)
     colnames(GOseq.result.1)
 
     enrich_res <- enrichDF2enrichResult(GOseq.result.1,
-        qvalueCutoff = q.cut.off,
+        pvalueCutoff = q.cut.off,
         pAdjustMethod = "BH",
         keyColname = "ID",
         # pathGenes = "pathGenes",
@@ -231,7 +231,6 @@ DAG.GOseq.fun <- function(GOseq.result, GO_DB, GO.ontology, termfile, GOI.list, 
         geneDelim = "[,/ ]+",
         geneSep = ",",
         pvalueColname = "pvalue",
-        qvalueColname = "FDR",
         descriptionColname = "ID",
         msigdbGmtT = NULL,
         verbose = FALSE
@@ -244,12 +243,14 @@ DAG.GOseq.fun <- function(GOseq.result, GO_DB, GO.ontology, termfile, GOI.list, 
         distinct()
 
     enrich_res@geneSets <- split(as.character(eGO_DB$geneID), as.character(eGO_DB$ID))
+    # enrich_res@result$p.adjust<- GOseq.result.1$p.adjust
+
     print(outpath)
 
     pdf(outpath)
     tryCatch(
         {
-            enrich_res %>% plotGOgraph(useFullNames = TRUE, .NO.CHAR = 35)
+            enrich_res %>% plotGOgraph(useFullNames = TRUE, .NO.CHAR = 35, )
         },
         error = function(e) {
             message("An error occurred: ", e$message)

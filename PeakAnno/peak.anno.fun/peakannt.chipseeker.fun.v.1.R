@@ -52,7 +52,14 @@ annt.gene.fun <- function(x) {
   print(nrow(d1))
   print(d1$annotation %>% str_extract("^\\w+") %>% unique())
   print(length(d1$geneId %>% unique()))
-  return(d1$geneId %>% unique())
+  head(d1)
+  d2 <- data.frame(geneId = c(d1$geneId, d1$flank_geneIds)) %>%
+    separate_longer_delim(geneId, delim = ";") %>%
+    distinct() %>%
+    na.omit()
+  print(nrow(d2))
+  head(d2)
+  return(d2$geneId %>% unique())
 }
 
 
@@ -61,10 +68,15 @@ annt.gene.fun <- function(x) {
 print("files formate: col1: path; col2: ID # names of peaksets")
 print("0-base coordinate system in use \n please check your input files format")
 
-peak.Anno.fun <- function(files, outpath, date, plot = F, output.gene.table = T, Txdb = Txdb) {
+peak.Anno.fun <- function(files = NULL, grl = NULL, outpath = "./", date = date, plot = F, output.gene.table = T, Txdb = Txdb) {
   txdb <- loadDb(Txdb)
   print(outpath)
-  grl <- beds2grl(files)
+
+  if (is.null(grl)) {
+    grl <- beds2grl(files)
+  } else {
+    print("grl as input")
+  }
 
   head(grl)
   length(grl)
@@ -87,7 +99,7 @@ peak.Anno.fun <- function(files, outpath, date, plot = F, output.gene.table = T,
       "Promoter", "5UTR", "3UTR", "Exon", "Intron",
       "Downstream", "Intergenic"
     ),
-    level = "gene", sameStrand = F
+    level = "gene", sameStrand = F, addFlankGeneInfo = TRUE, flankDistance = 0
   )
   genes <- lapply(peakAnnoList, function(i) {
     annt.gene.fun(i)

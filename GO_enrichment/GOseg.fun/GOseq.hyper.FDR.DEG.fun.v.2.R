@@ -92,17 +92,17 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
   colnames(termfile) <- c("ID", "Description", "Ontology")
   termfile %>% head()
   termfile %>% nrow()
-  length(termfile$ID %>% unique()) %>% print()
-  which(!(GO_ALL$ID %>% unique()) %in% (termfile$ID %>% unique())) %>%
-    length() %>%
-    print()
+  # length(termfile$ID %>% unique()) %>% print()
+  # which(!(GO_ALL$ID %>% unique()) %in% (termfile$ID %>% unique())) %>%
+  #   length() %>%
+  #   print()
 
-  which(!(GO_ALL$geneID %>% unique()) %in% (all.genes$geneID %>% unique())) %>%
-    length() %>%
-    print()
+  # which(!(GO_ALL$geneID %>% unique()) %in% (all.genes$geneID %>% unique())) %>%
+  #   length() %>%
+  #   print()
 
-  setdiff(GO_ALL$geneID, all.genes$geneID) %>% print()
-  setdiff(all.genes$geneID, GO_ALL$geneID) %>% print()
+  # setdiff(GO_ALL$geneID, all.genes$geneID) %>% print()
+  # setdiff(all.genes$geneID, GO_ALL$geneID) %>% print()
   print(paste("All annotated genes in GO term list", GO_ALL$geneID %>% unique() %>% length()))
   print(paste("All  GO term number", GO_ALL$ID %>% unique() %>% length()))
 
@@ -203,28 +203,31 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
     enriched.go.annot <- rbind(enriched.go.BP, enriched.go.CC, enriched.go.MF)
     head(enriched.go.annot)
 
-    enriched.go.annot <- enriched.go.annot %>%
-      dplyr::select(
-        "ID",
-        "pvalue",
-        "geneHits",
-        "pathGenes",
-        "FDR",
-        "term", "Description",
-        "Ontology",
-        "entries"
-      )
+    if (enriched.go.annot %>% is.null()) {
+      print("no GO passed qvalue cut-off")
+    } else {
+      enriched.go.annot <- enriched.go.annot %>%
+        dplyr::select(
+          "ID",
+          "pvalue",
+          "geneHits",
+          "pathGenes",
+          "FDR",
+          "term", "Description",
+          "Ontology",
+          "entries"
+        )
 
-    name <- file.path(datapath, "output", "GOterm", paste0(i %>% basename() %>% str_replace("\\.id", "_GOseq.enrichment.txt")))
-    print("output enriched result:")
-    print(name)
-    summary.number <- dplyr::count(enriched.go.annot, Ontology) %>% dplyr::rename(term.number = n)
-    print("total  enriched terms:")
-    print(summary.number)
-    print(enriched.go.annot$Ontology %>% unique())
-    write.table(enriched.go.annot, name, sep = "\t", quote = FALSE, row.names = F)
-    print(paste("file:", i, "GO term enrichment done"))
-
+      name <- file.path(datapath, "output", "GOterm", paste0(i %>% basename() %>% str_replace("\\.id", "_GOseq.enrichment.txt")))
+      print("output enriched result:")
+      print(name)
+      summary.number <- dplyr::count(enriched.go.annot, Ontology) %>% dplyr::rename(term.number = n)
+      print("total  enriched terms:")
+      print(summary.number)
+      print(enriched.go.annot$Ontology %>% unique())
+      write.table(enriched.go.annot, name, sep = "\t", quote = FALSE, row.names = F)
+      print(paste("file:", i, "GO term enrichment done"))
+    }
 
     ## plotting -----
     p1 <- NULL
