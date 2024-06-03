@@ -17,7 +17,7 @@
 library(ChIPpeakAnno)
 library(tidyverse)
 
-peak.venn <- function(files, outpath, date, colors=NULL) {
+peak.venn <- function(files, outpath, date, colors = NULL) {
     print(outpath)
     ## input -----
     if (!is.data.frame(files)) {
@@ -68,8 +68,8 @@ peak.venn <- function(files, outpath, date, colors=NULL) {
     names(grl)
 
     grl1 <- grl
-    if(colors=NULL){
-        colors = rainbow(length(grl1))
+    if (colors %>% is.null()) {
+        colors <- rainbow(length(grl1))
     }
 
     print(file.path(outpath, paste0("peak.venn.", date, ".pdf")))

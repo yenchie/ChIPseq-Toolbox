@@ -59,22 +59,39 @@ GOI.genome.browser <- function(grl = grl, geneID = NULL, seqname = NULL, range =
     if (!geneID %>% is.null()) {
         seqname <- gene.df$seqnames[which(gene.df$geneID == geneID)] %>% unique()
         range <- c(gene.df$start[which(gene.df$geneID == geneID)], gene.df$end[which(gene.df$geneID == geneID)])
-        minx <- min(range) / 10^6 - 0.003
-        maxx <- max(range) / 10^6 + 0.003
+        minx <- min(range) / 10^6 - 0.005
+        maxx <- max(range) / 10^6 + 0.005
+        range.gr <- GRanges(
+            seqnames = seqname,
+            ranges = IRanges(min(range) - 5000, max(range) + 5000)
+        )
     } else {
         seqname <- seqname
         range <- range
         minx <- min(range) / 10^6
         maxx <- max(range) / 10^6
+        range.gr <- GRanges(
+            seqnames = seqname,
+            ranges = IRanges(min(range), max(range))
+        )
     }
-    print(paste("display region:", seqname, paste(range, collapse = "-")))
+
+    print(paste("display region:", seqname, paste(min(range), max(range), sep = "-")))
 
 
     p.d1 <- res %>%
         bind_rows(gene.df) %>%
         bind_rows(transcript.id.df) %>%
-        filter(seqnames %in% seqname) %>%
-        filter((minx * 10^6 < start) & (end < maxx * 10^6))
+        filter(seqnames %in% seqname)
+
+    hits <- findOverlaps(p.d1 %>%
+        dplyr::rename(Stand = strand) %>%
+        makeGRangesFromDataFrame(
+            ignore.strand = T,
+            keep.extra.columns = TRUE, starts.in.df.are.0based = T
+        ), range.gr) %>% as.data.frame()
+
+    p.d1 <- p.d1[hits$queryHits, ]
 
     if (all(unique(res$name) %in% unique(p.d1$name))) {
         print("all peakset display in the region")
@@ -129,6 +146,10 @@ GOI.genome.browser <- function(grl = grl, geneID = NULL, seqname = NULL, range =
 
     line.width <- line.width %>% filter(feature %in% unique(peakset.plot.df$feature))
 
+    custom_label <- function(labels) {
+        sapply(labels, function(label) ifelse(grepl("transcript.*", label), " ", label))
+    }
+
     p <- peakset.plot.df %>%
         mutate(
             alter = alter %>%
@@ -155,9 +176,10 @@ GOI.genome.browser <- function(grl = grl, geneID = NULL, seqname = NULL, range =
                 ylab("peakset") +
                 xlab("position (Mbase)") +
                 scale_x_continuous(
-                    labels = scales::number_format(accuracy = 0.01),
-                    limits = c(minx, maxx + (10^-3))
+                    labels = scales::number_format(accuracy = 0.01)
+                    # limits = c(minx, maxx + (10^-3))
                 ) +
+                scale_y_discrete(labels = custom_label) +
                 scale_discrete_manual(
                     aesthetic = "linewidth",
                     values = line.width$line.width
@@ -186,6 +208,7 @@ GOI.genome.browser <- function(grl = grl, geneID = NULL, seqname = NULL, range =
                     ),
                     plot.background = element_rect(fill = "#eceae1")
                 ) +
+                coord_cartesian(xlim = c(minx, maxx)) +
                 facet_grid(facet ~ ., scales = "free_y", space = "free_y")
         }
     return(p)
