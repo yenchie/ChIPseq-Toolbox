@@ -1,4 +1,4 @@
-# plotanntBar.R
+# plotdistTotss.R
 # author: YCW
 # date: 2024.06.05
 ###
