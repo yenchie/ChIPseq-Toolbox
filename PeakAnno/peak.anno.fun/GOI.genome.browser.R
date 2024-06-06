@@ -8,39 +8,8 @@
 # USAGE:
 # GOI.genome.browser(grl = grl, geneID = NULL, seqname = NULL, range = NULL)
 
-
-## features display ----
-# gff.v1.1 <- c("./Gmax_189_gene_exons.gff3.gz") %>%
-#     read.delim(header = F, stringsAsFactors = F, skip = 1)
-#  gene.df <- gff.v1.1 %>%
-#      filter(V3 == "mRNA") %>%
-#      mutate(
-#          geneID = V9 %>% str_extract("(?<=Parent=)\\w+\\.*\\d*"),
-#          Name = V9 %>% str_extract("(?<=Name=)\\w+\\.*\\d*(?=;)"),
-#          transcript.ID = V9 %>% str_extract("(?<=pacid=)\\w+"),
-#          seqnames = V1, start = (V4 - 1), end = V5,
-#          strand = ifelse(V7 == "+", ">", "<"),
-#          feature = "gene", name = "gene"
-#      ) %>%
-#      dplyr::select(seqnames, start, end, geneID, Name, transcript.ID, strand, feature, name) %>%
-#      distinct()
-
-# transcript.id.df <- gff.v1.1 %>%
-#     filter(V3 != "gene") %>%
-#     filter(V3 != "exon") %>%
-#     mutate(
-#         transcript.ID = V9 %>% str_extract("(?<=ID=PAC:)\\w+"),
-#         seqnames = V1, start = (V4 - 1), end = V5,
-#         strand = ifelse(V7 == "+", ">", "<"),
-#         feature = V3, name = "transcript"
-#     ) %>%
-#     dplyr::select(seqnames, start, end, transcript.ID, strand, feature, name) %>%
-#     distinct() %>%
-#     left_join(gene.df %>% dplyr::select(geneID, Name, transcript.ID)) %>%
-#     group_by(geneID) %>%
-#     mutate(alter = Name %>% str_extract("\\d+$") %>% as.numeric()) %>%
-#     ungroup()
-# save(gene.df, transcript.id.df, file = "./000/Toolbox/PeakAnno/Gmax189.GB.Rdata")
+# please generate variables, gene.df and transcript.id.df from annotation file (e.g. gff).
+# script: annotate.variables.R
 
 
 GOI.genome.browser <- function(grl = grl, geneID = NULL, seqname = NULL, range = NULL) {
@@ -107,24 +76,24 @@ GOI.genome.browser <- function(grl = grl, geneID = NULL, seqname = NULL, range =
     peakset.plot.df <- p.d1 %>%
         rownames_to_column("order") %>%
         mutate(o.ID = ifelse(name == "transcript",
-            paste(transcript.ID, seqnames, start, end, sep = "__"),
+            paste(transcript, seqnames, start, end, sep = "__"),
             ifelse(name == "gene", paste(seqnames, start, end, sep = "__"),
                 paste(order, seqnames, start, end, sep = "__")
             )
         )) %>%
-        dplyr::select(seqnames, start, end, strand, geneID, transcript.ID, feature, name, Name, alter, o.ID) %>%
+        dplyr::select(seqnames, start, end, strand, geneID, transcript.ID, feature, name, transcript, o.ID) %>%
         distinct() %>%
         mutate(label.coord = (start + end + 1) / 2) %>%
         as.data.frame() %>%
         mutate(
             geneID = ifelse(feature == "gene", geneID,
-                ifelse(feature == "mRNA", Name, NA)
+                ifelse(feature == "mRNA", transcript.ID, NA)
             ),
             alter = ifelse(name == "transcript",
-                paste("transcript", alter, sep = "."), name
+                paste("transcript", transcript, sep = "."), name
             ),
             strand = ifelse(feature == "peak",
-                NA, strand
+                NA, ifelse(strand == "+", ">", ifelse("-", "<", NA))
             ),
             feature = ifelse(feature == "peak",
                 name, ifelse(feature == "mRNA", "intron", feature)
@@ -147,7 +116,11 @@ GOI.genome.browser <- function(grl = grl, geneID = NULL, seqname = NULL, range =
     line.width <- line.width %>% filter(feature %in% unique(peakset.plot.df$feature))
 
     custom_label <- function(labels) {
-        sapply(labels, function(label) ifelse(grepl("transcript.*", label), " ", label))
+        sapply(labels, function(label) {
+            ifelse(str_detect(label, "transcript"),
+                " ", label
+            )
+        })
     }
 
     p <- peakset.plot.df %>%
@@ -172,12 +145,13 @@ GOI.genome.browser <- function(grl = grl, geneID = NULL, seqname = NULL, range =
                 geom_text(aes(group = o.ID, x = (label.coord / 10^6), y = alter, label = geneID),
                     vjust = 2.5, position = "identity", check_overlap = T, size = 3
                 ) +
+                # geom_text(aes(group = o.ID, x = (label.coord / 10^6), y = alter, label = peakID),
+                #     vjust = 2.5, position = "identity", check_overlap = T, size = 3) +
                 geom_text(aes(group = o.ID, x = (label.coord / 10^6), y = alter, label = strand), color = "white", size = 3) +
                 ylab("peakset") +
                 xlab("position (Mbase)") +
                 scale_x_continuous(
                     labels = scales::number_format(accuracy = 0.01)
-                    # limits = c(minx, maxx + (10^-3))
                 ) +
                 scale_y_discrete(labels = custom_label) +
                 scale_discrete_manual(
