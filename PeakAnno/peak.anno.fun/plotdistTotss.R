@@ -5,7 +5,7 @@
 # for annoPeak Object
 
 
-plotdistTotss <- function(annoPeakList, tssRegion = c(0, 1), limits = c(-1, 1)) {
+plotdistTotss <- function(annoPeakList, tssRegion = c(0, 1), limits = c(-1, 1), plot = TRUE) {
     print(tssRegion)
     res.peak.annt <- NULL
     for (set in names(annoPeakList)) {
@@ -23,7 +23,11 @@ plotdistTotss <- function(annoPeakList, tssRegion = c(0, 1), limits = c(-1, 1)) 
 
         peaks_df <- as.data.frame(peak.gr) %>% rowid_to_column(var = "queryHits")
         genes_df <- as.data.frame(gr.tss) %>%
-            rowid_to_column(var = "subjectHits")
+            rowid_to_column(var = "subjectHits")%>%
+          left_join(gr.ref%>%as.data.frame()%>%
+                      dplyr::select(geneID  , transcript.ID,
+                                    width, strand)%>%
+                      dplyr::rename(gene.width=width))
         head(genes_df)
         head(peaks_df)
 
@@ -36,10 +40,7 @@ plotdistTotss <- function(annoPeakList, tssRegion = c(0, 1), limits = c(-1, 1)) 
                     ifelse(start.y < start.x, distance, -distance),
                     ifelse(end.y > end.x, distance, -distance)
                 )
-            )) %>%
-            dplyr::select(queryHits, distance) %>%
-            mutate(peaksetID = set) %>%
-            distinct()
+            )) 
 
         head(distances)
         nrow(distances)
@@ -50,53 +51,63 @@ plotdistTotss <- function(annoPeakList, tssRegion = c(0, 1), limits = c(-1, 1)) 
     head(res.peak.annt)
     nrow(res.peak.annt)
 
-    bin_width <- 0.01
-    res.peak.annt.1 <- res.peak.annt %>%
-        mutate(
-            distance_kb = distance / 10^3,
-            bin = floor(distance_kb / bin_width) * bin_width
-        ) %>%
-        group_by(bin, peaksetID) %>%
-        mutate(bin_count = n()) %>%
-        ungroup() %>%
-        dplyr::select(bin, bin_count, peaksetID) %>%
-        distinct() %>%
-        group_by(peaksetID) %>%
-        mutate(proportion = bin_count / sum(bin_count)) %>%
-        ungroup()
+    if (plot ==T) {
+        bin_width <- 0.01
+        res.peak.annt.1 <- res.peak.annt %>%
+          dplyr::select(queryHits, distance) %>%
+          mutate(peaksetID = set) %>%
+          distinct()%>%
+            mutate(
+                distance_kb = distance / 10^3,
+                bin = floor(distance_kb / bin_width) * bin_width
+            ) %>%
+            group_by(bin, peaksetID) %>%
+            mutate(bin_count = n()) %>%
+            ungroup() %>%
+            dplyr::select(bin, bin_count, peaksetID) %>%
+            distinct() %>%
+            group_by(peaksetID) %>%
+            mutate(proportion = bin_count / sum(bin_count)) %>%
+            ungroup()
 
-    res.peak.annt.1 %>%
-        ggplot() +
-        geom_col(aes(x = bin, y = proportion, fill = peaksetID), position = "identity", alpha = 0.5) +
-        scale_x_continuous(limits = limits) +
-        ggtitle("distance to TSS") +
-        xlab("distance to nearest TSS(kb) (bin: 10b)") +
-        ylab("percentage (per all)") +
-        theme_bw() +
-        theme(
-            axis.text = element_text(size = 12, face = "bold"),
-            axis.title = element_text(size = 12, face = "bold")
-        ) +
-        guides(fill = guide_legend(reverse = TRUE)) +
-        scale_y_sqrt()
+        p<- res.peak.annt.1 %>%
+            ggplot() +
+            geom_col(aes(x = bin, y = proportion, fill = peaksetID), position = "identity", alpha = 0.5) +
+            scale_x_continuous(limits = limits) +
+            ggtitle("distance to TSS") +
+            xlab("distance to nearest TSS(kb) (bin: 10b)") +
+            ylab("percentage (per all)") +
+            theme_bw() +
+            theme(
+                axis.text = element_text(size = 12, face = "bold"),
+                axis.title = element_text(size = 12, face = "bold")
+            ) +
+            guides(fill = guide_legend(reverse = TRUE)) +
+            scale_y_sqrt() 
 
-    # res.peak.annt %>%
-    #     mutate(peaksetID = peaksetID %>% factor(levels = c(names(annoPeakList) %>% rev()))) %>%
-    #     arrange(peaksetID) %>%
-    #     ggplot() +
-    #     # geom_density(aes(distance / 10^3, ..scaled.., color = peaksetID), position = "identity") +
-    #     geom_histogram(aes(distance / 10^3, y = (..count..) / sum(..count..), fill = peaksetID), bins = 100, alpha = 0.8, position = "identity") +
-    #     ggtitle("distance to TSS") +
-    #     xlab("distance to nearest TSS (Kb)") +
-    #     ylab("density") +
-    #     scale_x_continuous(limits = c(-2.5, 2.5)) +
-    #     # scale_y_continuous(trans = "log10") +
-    #     theme_bw() +
-    #     theme(
-    #         axis.text = element_text(size = 12, face = "bold"),
-    #         axis.title = element_text(size = 12, face = "bold")
-    #     ) +
-    #     guides(fill = guide_legend(reverse = TRUE)) +
-    #     scale_y_sqrt()
-}
+        # res.peak.annt %>%
+        #     mutate(peaksetID = peaksetID %>% factor(levels = c(names(annoPeakList) %>% rev()))) %>%
+        #     arrange(peaksetID) %>%
+        #     ggplot() +
+        #     # geom_density(aes(distance / 10^3, ..scaled.., color = peaksetID), position = "identity") +
+        #     geom_histogram(aes(distance / 10^3, y = (..count..) / sum(..count..), fill = peaksetID), bins = 100, alpha = 0.8, position = "identity") +
+        #     ggtitle("distance to TSS") +
+        #     xlab("distance to nearest TSS (Kb)") +
+        #     ylab("density") +
+        #     scale_x_continuous(limits = c(-2.5, 2.5)) +
+        #     # scale_y_continuous(trans = "log10") +
+        #     theme_bw() +
+        #     theme(
+        #         axis.text = element_text(size = 12, face = "bold"),
+        #         axis.title = element_text(size = 12, face = "bold")
+        #     ) +
+        #     guides(fill = guide_legend(reverse = TRUE)) +
+        #     scale_y_sqrt()
+    }else{
+      p<-NULL
+    }
+    res<- list(p, res.peak.annt)
+    names(res)<- c("plot", "result.df")
+    return(res)
+} 
 # fin -----
