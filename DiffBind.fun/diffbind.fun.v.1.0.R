@@ -20,13 +20,21 @@ require(tibble)
 
 dba.plot <- function(data, title) {
   datac <- dba.count(data, peaks = NULL, score = DBA_SCORE_NORMALIZED)
+  method.corr <- "spearman"
+  corval <- plot(datac,
+    attributes = c(DBA_CONDITION, DBA_REPLICATE),
+    ColAttributes = DBA_CONDITION,
+    distMethod = method.corr
+  )
+
   plot(
     datac,
     sub = title,
+    main = method.corr,
     attributes = c(DBA_CONDITION, DBA_REPLICATE),
     ColAttributes = DBA_CONDITION,
-    distMethod = "spearman",
-    margin = 5
+    distMethod = method.corr,
+    margin = 5, cellnote = corval, notecol = "black"
   )
 
   heatmap.method <- list(
@@ -473,7 +481,7 @@ DiffBind.build.fun <- function(samplesheet_path = samplesheet_path, outpath = ou
     # score<-c("DBA_SCORE_RPKM_FOLD"
     # ) %>%as.character()
 
-    pdf(paste0("./DBdata.count.score.cluster.pdf"))
+    pdf(paste0("./DBdata.count.score.cluster.pdf"), height = 12, width = 12)
     par(mfrow = c(4, 3))
     global_matrix <- global_matrix.1 <- NULL
     a <- 0
@@ -484,13 +492,23 @@ DiffBind.build.fun <- function(samplesheet_path = samplesheet_path, outpath = ou
       )
       method <- c("pearson", "spearman")
       for (m in method) {
+        corval <- plot(
+          DBdata.count.score,
+          sub = paste0(score),
+          main = m,
+          attributes = c(DBA_CONDITION, DBA_REPLICATE),
+          ColAttributes = DBA_CONDITION,
+          distMethod = m
+        )
+
         plot(
           DBdata.count.score,
           sub = paste0(score),
+          main = m,
           attributes = c(DBA_CONDITION, DBA_REPLICATE),
           ColAttributes = DBA_CONDITION,
-          # margin = 5,
-          distMethod = m
+          margin = 5,
+          distMethod = m, cellnote = corval, notecol = "black"
         )
       }
 
@@ -813,7 +831,7 @@ DiffBind.nor.DE.fun <- function(DBdata.count, peakset = NULL, color = color, log
 
     norm <- dba.contrast(norm, categories = DBA_CONDITION, minMembers = 2)
     Plots[[a]] <- value.box.plot(norm, nor.parameter$title[nor], peakset = peakset)
-    pdf(paste0("./DBdata.normalized.cluster.", nor.parameter$title[nor], ".pdf"))
+    pdf(paste0("./DBdata.normalized.cluster.", nor.parameter$title[nor], ".pdf"), height = 12, width = 12)
     dba.plot(norm, nor.parameter$title[nor])
     dev.off()
     contrast.dba(norm, nor.parameter$title[nor])
