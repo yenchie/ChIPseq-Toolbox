@@ -85,16 +85,39 @@ peak.anno.fun <- function(files = NULL, grl = NULL, outpath = NULL, date = date,
         # plotting -----
         print(file.path(outpath, paste0("annoGene.plot.", date, ".pdf")))
         pdf(file.path(outpath, paste0("annoGene.plot.", date, ".pdf")))
+        if(length(grl1)==2){
+                cat.dist<- c( 0.01, 0.01)
+                cat.pos <- c(5, -5)
 
+            }else if(length(grl1)==3){
+                cat.dist<- c( 0.02, 0.02, 0.02)
+                cat.pos <- c(-10, 10, 180)
+
+            }else if(length(grl1)==4){
+                cat.dist<- c( 0.2, 0.2, 0.1, 0.1)
+                cat.pos <- c(5, 0, 0, 0)
+
+            }else if(length(grl1)==5){
+                cat.dist<- c( 0.2, 0.2, 0.21, 0.18, 0.2)
+                cat.pos <- c(5, -30, -120, 150, 30)
+
+            }else{
+
+            }
         tryCatch(
             {
                 makeVennDiagram(grl1,
-                    NameOfPeaks = c(names(grl1)),
-                    scaled = FALSE, euler.d = FALSE, totalTest = lengths(grl1) %>% max(),
-                    connectedPeaks = "keepAll",
-                    fill = rainbow(length(grl1)), # circle fill color
-                    col = rainbow(length(grl1)), # circle border color
-                    cat.col = rainbow(length(grl1))
+                    NameOfPeaks = c(paste(names(lengths(grl1)), lengths(grl1), sep="\n")),
+                cex = 3,  cat.cex=2, 
+                fontface = 2,
+                scaled = FALSE, euler.d = FALSE, totalTest = lengths(grl1) %>% max(), 
+                cat.fontface = 4,
+                cat.dist = cat.dist, # Modified
+                cat.pos =  cat.pos, # Modified
+                connectedPeaks = connectedPeaks,
+                fill = colors, # circle fill color
+                col = "black", # circle border color
+                cat.col = "black"
                 )
             },
             error = function(e) {
