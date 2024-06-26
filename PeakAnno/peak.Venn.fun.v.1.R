@@ -17,7 +17,7 @@
 library(ChIPpeakAnno)
 library(tidyverse)
 
-peak.venn <- function(files, outpath, date, colors = NULL) {
+peak.venn <- function(files, outpath, date, colors = NULL, connectedPeaks = "merge") {
     print(outpath)
     ## input -----
     if (!is.data.frame(files)) {
@@ -28,7 +28,7 @@ peak.venn <- function(files, outpath, date, colors = NULL) {
                 mutate(ID = path %>% as.character() %>% basename() %>% str_remove(".\\w+$"))
             nrow(files) %>% print()
             head(files) %>% print()
-            print("0-base coordinate system in use \n please check your input files format") # names for peakset
+            print("0-base coordinate system in use \n please check your input files format") 
         } else {
             print(" please recheck the input table. \n files formate: col1: path; col2: ID # names of peaksets")
             print("0-base coordinate system in use \n please check your input files format")
@@ -73,22 +73,56 @@ peak.venn <- function(files, outpath, date, colors = NULL) {
     }
 
     print(file.path(outpath, paste0("peak.venn.", date, ".pdf")))
-    pdf(file.path(outpath, paste0("peak.venn.", date, ".pdf")))
-    tryCatch(
-        {
-            makeVennDiagram(grl1,
-                NameOfPeaks = c(names(grl1)),
-                scaled = FALSE, euler.d = FALSE, totalTest = lengths(grl1) %>% max(),
-                connectedPeaks = "keepAll",
-                fill = colors, # circle fill color
-                col = colors, # circle border color
-                cat.col = colors
-            )
-        },
-        error = function(e) {
-            cat("An error occurred:", conditionMessage(e), "\n")
-        }
-    )
+    pdf(file.path(outpath, paste0("peak.venn.", date, ".pdf")),width = 12, height = 12)
 
+    if(length(grl1)==2){
+        Cat.dist<- c( 0.01, 0.01)
+        Cat.pos <- c(5, -5)
+        Cex=3
+        Cat.cex=3
+    }else if(length(grl1)==3){
+        Cat.dist<- c( 0.02, 0.02, 0.02)
+        Cat.pos <- c(-10, 10, 180)
+        Cex=3
+        Cat.cex=2
+
+    }else if(length(grl1)==4){
+        Cat.dist<- c( 0.2, 0.2, 0.1, 0.1)
+        Cat.pos <- c(5, 0, 0, 0)
+        Cex=3
+        Cat.cex=2
+
+    }else if(length(grl1)==5){
+        Cat.dist<- c( 0.2, 0.2, 0.21, 0.18, 0.2)
+        Cat.pos <- c(5, -30, -120, 150, 30)
+        Cex=2
+        Cat.cex=2
+
+    }else{
+
+    }
+
+    tryCatch(
+            {
+            makeVennDiagram(grl1,
+                NameOfPeaks = c(paste(names(lengths(grl1)), lengths(grl1), sep="\n")),
+                cex = Cex,  cat.cex=Cat.cex, 
+                fontface = 2,
+                scaled = FALSE, euler.d = FALSE, totalTest = lengths(grl1) %>% max(), 
+                cat.fontface = 4,
+                cat.dist = Cat.dist, # Modified
+                cat.pos =  Cat.pos, # Modified
+                connectedPeaks = connectedPeaks,
+                fill = colors, # circle fill color
+                col = "black", # circle border color
+                cat.col = "black"
+            )
+            },
+            error = function(e) {
+                cat("An error occurred:", conditionMessage(e), "\n")
+            }
+        )
+        
+   
     dev.off()
 }

@@ -1,3 +1,6 @@
-*.pptx
-
+# tmp log file--
 .DS_Store
+
+# big files 
+*.pptx
+*.refseq.txt
