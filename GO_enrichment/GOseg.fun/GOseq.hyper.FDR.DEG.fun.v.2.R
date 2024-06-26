@@ -179,15 +179,15 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
 
     q.cut.of <- 0.05
     BP <- GO.seq.ego(pwf, GO_BP, termfile = termfile, 0.05)
-    outpath <- file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id", paste0("_DAG.BP", q.cut.of, ".pdf"))))
+    outpath <- file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id$", paste0("_DAG.BP", q.cut.of, ".pdf"))))
     DAG.GOseq.fun(GOseq.result = BP$ego, GO_DB = GO_BP, GO.ontology = "BP", termfile, GOI.list = de.genes$V1, q.cut.off = 0.05, outpath = outpath)
 
     CC <- GO.seq.ego(pwf, GO_CC, termfile = termfile, 0.05)
-    outpath <- file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id", paste0("_DAG.CC", q.cut.of, ".pdf"))))
+    outpath <- file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id$", paste0("_DAG.CC", q.cut.of, ".pdf"))))
     DAG.GOseq.fun(CC$ego, GO_CC, "CC", termfile, de.genes$V1, 0.05, outpath)
 
     MF <- GO.seq.ego(pwf, GO_MF, termfile = termfile, 0.05)
-    outpath <- file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id", paste0("_DAG.MF", q.cut.of, ".pdf"))))
+    outpath <- file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id$", paste0("_DAG.MF", q.cut.of, ".pdf"))))
     DAG.GOseq.fun(MF$ego, GO_MF, "MF", termfile, de.genes$V1, 0.05, outpath)
 
     # mix table into one.
@@ -218,7 +218,7 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
           "entries"
         )
 
-      name <- file.path(datapath, "output", "GOterm", paste0(i %>% basename() %>% str_replace("\\.id", "_GOseq.enrichment.txt")))
+      name <- file.path(datapath, "output", "GOterm", paste0(i %>% basename() %>% str_replace("\\.id$", "_GOseq.enrichment.txt")))
       print("output enriched result:")
       print(name)
       summary.number <- dplyr::count(enriched.go.annot, Ontology) %>% dplyr::rename(term.number = n)
@@ -273,11 +273,11 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
 
       print(paste(
         "output:",
-        file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id", "_dotplot_top10_terms.pdf")))
+        file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id$", "_dotplot_top10_terms.pdf")))
       ))
 
       ggsave(
-        filename = paste0(i %>% basename() %>% str_replace("\\.id", "_dotplot_top10_terms.pdf")),
+        filename = paste0(i %>% basename() %>% str_replace("\\.id$", "_dotplot_top10_terms.pdf")),
         plot = p1,
         path = file.path(datapath, "output", "plot"),
         width = 16,
@@ -322,7 +322,7 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
 
         print(paste(
           "output:",
-          file.path(datapath, "output", "plot", paste0(ont, "_", i %>% basename() %>% str_replace("\\.id", "_dotplot_all_terms.pdf")))
+          file.path(datapath, "output", "plot", paste0(ont, "_", i %>% basename() %>% str_replace("\\.id$", "_dotplot_all_terms.pdf")))
         ))
 
         if (length(d2$category %>% unique()) < 20) {
@@ -331,7 +331,7 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
           zoom <- length(d2$category %>% unique()) / 20
         }
         ggsave(
-          filename = paste0(ont, "_", i %>% basename() %>% str_replace("\\.id", "_dotplot_all_terms.pdf")),
+          filename = paste0(ont, "_", i %>% basename() %>% str_replace("\\.id$", "_dotplot_all_terms.pdf")),
           plot = p2,
           path = file.path(datapath, "output", "plot"),
           width = 12,
