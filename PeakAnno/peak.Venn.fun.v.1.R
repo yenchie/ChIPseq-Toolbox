@@ -88,18 +88,17 @@ peak.venn <- function(files, outpath, date, colors = NULL, connectedPeaks = "mer
 
     }else if(length(grl1)==4){
         Cat.dist<- c( 0.2, 0.2, 0.1, 0.1)
-        Cat.pos <- c(5, 0, 0, 0)
+        Cat.pos <- c(0, 0, 0, 0)
         Cex=3
         Cat.cex=2
+        grl1<- grl1[c(1,4,2,3)]
 
     }else if(length(grl1)==5){
         Cat.dist<- c( 0.2, 0.2, 0.21, 0.18, 0.2)
         Cat.pos <- c(5, -30, -120, 150, 30)
         Cex=2
         Cat.cex=2
-
-    }else{
-
+        grl1<-grl1[c(1, 5 ,4 ,3 , 2)]
     }
 
     tryCatch(

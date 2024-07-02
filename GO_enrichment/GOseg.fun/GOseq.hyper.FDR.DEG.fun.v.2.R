@@ -178,17 +178,17 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
     ## GO terms enrichment of Biological Process ------
 
     q.cut.of <- 0.05
-    BP <- GO.seq.ego(pwf, GO_BP, termfile = termfile, 0.05)
+    BP <- GO.seq.ego(pwf, GO_BP, termfile = termfile, q.cut.of)
     outpath <- file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id$", paste0("_DAG.BP", q.cut.of, ".pdf"))))
-    DAG.GOseq.fun(GOseq.result = BP$ego, GO_DB = GO_BP, GO.ontology = "BP", termfile, GOI.list = de.genes$V1, q.cut.off = 0.05, outpath = outpath)
+    DAG.GOseq.fun(GOseq.result = BP$ego, GO_DB = GO_BP, GO.ontology = "BP", termfile, GOI.list = de.genes$V1, q.cut.off = q.cut.of, outpath = outpath)
 
-    CC <- GO.seq.ego(pwf, GO_CC, termfile = termfile, 0.05)
+    CC <- GO.seq.ego(pwf, GO_CC, termfile = termfile, q.cut.of)
     outpath <- file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id$", paste0("_DAG.CC", q.cut.of, ".pdf"))))
-    DAG.GOseq.fun(CC$ego, GO_CC, "CC", termfile, de.genes$V1, 0.05, outpath)
+    DAG.GOseq.fun(CC$ego, GO_CC, "CC", termfile, GOI.list = de.genes$V1, q.cut.off = q.cut.of, outpath = outpath)
 
-    MF <- GO.seq.ego(pwf, GO_MF, termfile = termfile, 0.05)
+    MF <- GO.seq.ego(pwf, GO_MF, termfile = termfile, q.cut.of)
     outpath <- file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id$", paste0("_DAG.MF", q.cut.of, ".pdf"))))
-    DAG.GOseq.fun(MF$ego, GO_MF, "MF", termfile, de.genes$V1, 0.05, outpath)
+    DAG.GOseq.fun(MF$ego, GO_MF, "MF", termfile, GOI.list = de.genes$V1, q.cut.off = q.cut.of, outpath = outpath)
 
     # mix table into one.
     enriched.go.BP <- BP$fin.result
