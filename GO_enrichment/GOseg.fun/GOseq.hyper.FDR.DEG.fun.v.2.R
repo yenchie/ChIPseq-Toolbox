@@ -76,7 +76,14 @@ require(ggplot2)
 # source((source.path %>% list.dirs() %>% list.files("GOseq.ego.fun.v.1.R", full.names = T)))
 
 
-GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.path) {
+GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.path, q.cut.off=0.05) {
+  # if(q.cut.off%>% is.null()){
+  #   q.cut.off<-0.05
+  # }
+  print("q-value cut-off:")
+  print(q.cut.off)
+
+
   # read all the table.
   all.genes <- read.table(all.genes.path, sep = "\t", stringsAsFactors = FALSE, header = FALSE)
   colnames(all.genes) <- c("geneID", "length")
@@ -177,7 +184,7 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
 
     ## GO terms enrichment of Biological Process ------
 
-    q.cut.of <- 0.05
+    q.cut.of <- q.cut.off
     BP <- GO.seq.ego(pwf, GO_BP, termfile = termfile, q.cut.of)
     outpath <- file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id$", paste0("_DAG.BP", q.cut.of, ".pdf"))))
     DAG.GOseq.fun(GOseq.result = BP$ego, GO_DB = GO_BP, GO.ontology = "BP", termfile, GOI.list = de.genes$V1, q.cut.off = q.cut.of, outpath = outpath)
@@ -237,20 +244,26 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
         read.delim(
           name,
           stringsAsFactors = F
-        ) %>% arrange(FDR)
-      colnames(d1)
-      print(d1$Ontology %>% unique())
-      p1 <- d1 %>%
+        ) %>% arrange(FDR)%>%
         na.omit() %>%
         mutate(log10.qval = -log10(FDR)) %>%
         filter(!log10.qval %>% is.infinite()) %>%
-        group_by(Ontology) %>%
-        top_n(10, wt = log10.qval) %>%
-        ungroup() %>%
+        filter(log10.qval > -log10(0.05) )%>%
         mutate(
           Description = Description %>% str_wrap(width = 40),
           GeneRatio = geneHits * 100 / pathGenes
-        ) %>%
+        )
+
+      head(d1)
+      colnames(d1)
+      print(d1$Ontology %>% unique())
+      print(min(d1$log10.qval))
+      print(max(d1$log10.qval))
+
+      p1 <- d1  %>%
+        group_by(Ontology) %>%
+        top_n(10, wt = log10.qval) %>%
+        ungroup() %>%
         ggplot(aes(
           x = GeneRatio,
           y = reorder(Description, GeneRatio),
@@ -288,13 +301,9 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
       d2 <- NULL
       for (ont in d1$Ontology %>% unique()) {
         d2 <- d1 %>% # na.omit()%>%
-          filter(Ontology == ont) %>%
-          mutate(log10.qval = -log10(FDR)) %>%
-          filter(!log10.qval %>% is.infinite()) %>%
-          mutate(
-            Description = Description %>% str_wrap(width = 40),
-            GeneRatio = geneHits * 100 / pathGenes
-          )
+          filter(Ontology == ont) 
+
+        print(min(d2$log10.qval))
 
         p2 <- d2 %>%
           ggplot(aes(
@@ -343,6 +352,7 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
       print(paste("No GO terms were enriched in the file:", i))
     }
   }
-
+  
+  print("GO enrichment analysis has been completed for all files.")
   Sys.sleep(5)
 }
