@@ -66,32 +66,15 @@ dba.plot <- function(data, title) {
   dba.plotPCA(datac, sub = title)
 }
 value.box.plot <- function(data, title, peakset = NULL) {
-  if (!is.null(peakset)) {
-    print("specific peakset in use")
-  } else {
-    print("NULL peakset in use")
-    peakset <- NULL
-  }
-  datac <- dba.count(data, peaks = NULL, score = DBA_SCORE_NORMALIZED)
-  nor.value <- dba.peakset(datac, bRetrieve = T, DataType = DBA_DATA_FRAME) %>%
-    mutate(ID = paste(CHR, START, END, sep = "_"), .before = CHR) %>%
-    dplyr::select(-c(CHR, START, END)) %>%
+  SampleID <- colnames(data)[4:ncol(data)]
+  input <- data %>%
     pivot_longer(
-      cols = 2:nrow(datac$samples) + 1,
-      names_to = "SampleID",
-      values_to = "nor.value"
+      cols = 4:(ncol(data)),
+      names_to = "SampleID", values_to =  "nor.value"
     ) %>%
-    mutate(
-      stage = SampleID %>% str_extract("^\\w+"),
-      SampleID = SampleID %>% str_remove("\\.H3.*")
-    ) %>%
-    mutate(stage = factor(stage,
-      levels = c("cot", "em", "mm", "lm", "pd1", "dry", "sdlg27h", "sdlg8day")
-    )) %>%
-    arrange(stage)
-  input <- nor.value %>%
     mutate(SampleID = SampleID %>%
       factor(levels = unique(SampleID)))
+
   print(head(input))
 
   outlier <- quantile(input$nor.value, c(0.25, 0.75))
@@ -806,56 +789,78 @@ DiffBind.nor.DE.fun <- function(DBdata.count, peakset = NULL, color = color, log
     peakset <- NULL
   }
   nor.parameter <- data.frame(
-    nor = c("DBA_NORM_LIB"),
-    lib = c("DBA_LIBSIZE_FULL"),
-    BG = c(F),
-    offset = c(F),
-    title = c("LIB-FULL")
+    nor = c("DBA_NORM_LIB", "DBA_NORM_LIB"),
+    lib = c("DBA_LIBSIZE_FULL", "DBA_LIBSIZE_PEAKREADS"),
+    BG = c(F, F),
+    offset = c(F, F),
+    title = c("LIB_FULL", "LIB_RiP")
   )
 
   Plots <- list()
   a <- 0
-  for (nor in 1:length(nor.parameter$title)) {
-    a <- a + 1
-    norm <- NULL
-    norm <- dba.normalize(
-      DBdata.count,
-      method = DBA_ALL_METHODS,
-      normalize = get(nor.parameter$nor[nor]),
-      library = get(nor.parameter$lib[nor]),
-      background = nor.parameter$BG[nor],
-      offset = nor.parameter$offset[nor]
-    )
-    # norm<- dba.count(norm, peaks=NULL, score = DBA_SCORE_NORMALIZED)
-    # norm.table <- dba.peakset(norm, peaks=NULL, bRetrieve = T, DataType = DBA_DATA_FRAME)
 
-    norm <- dba.contrast(norm, categories = DBA_CONDITION, minMembers = 2)
-    Plots[[a]] <- value.box.plot(norm, nor.parameter$title[nor], peakset = peakset)
-    pdf(paste0("./DBdata.normalized.cluster.", nor.parameter$title[nor], ".pdf"), height = 12, width = 12)
-    dba.plot(norm, nor.parameter$title[nor])
-    dev.off()
-    contrast.dba(norm, nor.parameter$title[nor])
+
+  if (dir.exists(file.path(outpath, "DBS_table"))) {
+    print("DBS_table had been prepared.")
+  } else {
+    print("normalizing and comparing ...")
+    for (nor in 1:length(nor.parameter$title)) {
+      a <- a + 1
+      norm <- NULL
+      norm <- dba.normalize(
+        DBdata.count,
+        method = DBA_ALL_METHODS,
+        normalize = get(nor.parameter$nor[nor]),
+        library = get(nor.parameter$lib[nor]),
+        background = nor.parameter$BG[nor],
+        offset = nor.parameter$offset[nor]
+      )
+      norm <- dba.count(norm, peaks = NULL, score = DBA_SCORE_NORMALIZED)
+      norm.table <- dba.peakset(norm, peaks = NULL, bRetrieve = T, DataType = DBA_DATA_FRAME)
+      head(norm.table)
+
+      Plots[[a]] <- value.box.plot(norm.table, nor.parameter$title[nor], peakset = peakset)
+
+      norm.table <- norm.table %>%
+        pivot_longer(
+          cols = 4:(ncol(norm.table)),
+          names_to = "SampleID", values_to = nor.parameter$title[nor]
+        )
+      head(norm.table)
+
+      write.table(
+        norm.table,
+        file = paste0("./DBdata.nor.count.", nor.parameter$title[nor], ".global_binding_matrix.txt"),
+        sep = "\t",
+        quote = FALSE,
+        row.names = F
+      )
+
+      norm <- dba.contrast(norm, categories = DBA_CONDITION, minMembers = 2)
+      pdf(paste0("./DBdata.normalized.cluster.", nor.parameter$title[nor], ".pdf"), height = 12, width = 12)
+      dba.plot(norm, nor.parameter$title[nor])
+      dev.off()
+      contrast.dba(norm, nor.parameter$title[nor])
+    }
+    plot.nor <-
+      ggarrange(
+        plotlist = Plots,
+        labels = LETTERS[1:length(Plots) * 2],
+        ncol = 1,
+        nrow = length(Plots),
+        align = "v",
+        font.label = list(size = 12, color = "black", face = "bold", family = NULL, position = "top")
+      )
+
+    ggsave(
+      paste0("dba.normalized.value.boxplot.pdf"),
+      plot.nor,
+      width = 12,
+      height = 24 / 3,
+      units = "in",
+      device = "pdf"
+    )
   }
-
-
-  plot.nor <-
-    ggarrange(
-      plotlist = Plots,
-      labels = LETTERS[1:length(Plots) * 2],
-      ncol = 1,
-      nrow = length(Plots),
-      align = "v",
-      font.label = list(size = 12, color = "black", face = "bold", family = NULL, position = "top")
-    )
-
-  ggsave(
-    paste0("dba.normalized.value.boxplot.pdf"),
-    plot.nor,
-    width = 12,
-    height = 24 / 6,
-    units = "in",
-    device = "pdf"
-  )
 
   ##### ---------
   # count pair-wise matrix: DEseq2, edgeR, and inBoth -------
@@ -893,7 +898,7 @@ DiffBind.nor.DE.fun <- function(DBdata.count, peakset = NULL, color = color, log
 
   # pair-wise comparison peak number statistic ----
   res.allmethod <- NULL
-  m <- "LIB-FULL"
+  # m <- "LIB-FULL"
   for (m in unique(report.files$method)) {
     res <- NULL
     report.files.1 <- report.files %>% filter(method == m)

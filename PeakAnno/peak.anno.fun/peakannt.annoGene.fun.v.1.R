@@ -104,6 +104,9 @@ peak.anno.fun <- function(files = NULL, grl = NULL, outpath = NULL, date = date,
             }else{
 
             }
+
+        colors <- rainbow(length(grl1))  
+        connectedPeaks="keepAll"    
         tryCatch(
             {
                 makeVennDiagram(grl1,

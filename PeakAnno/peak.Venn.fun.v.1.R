@@ -17,8 +17,9 @@
 library(ChIPpeakAnno)
 library(tidyverse)
 
-peak.venn <- function(files, outpath, date, colors = NULL, connectedPeaks = "merge") {
+peak.venn <- function(files, outpath, date, colors = NULL, connectedPeaks = "merge", outname= outname) {
     print(outpath)
+    print(outname)
     ## input -----
     if (!is.data.frame(files)) {
         if (file.exists(files) %>% which() %>% length() == length(files)) {
@@ -73,7 +74,7 @@ peak.venn <- function(files, outpath, date, colors = NULL, connectedPeaks = "mer
     }
 
     print(file.path(outpath, paste0("peak.venn.", date, ".pdf")))
-    pdf(file.path(outpath, paste0("peak.venn.", date, ".pdf")),width = 12, height = 12)
+    pdf(file.path(outpath, paste0(outname, ".peak.venn.", date, ".pdf")), width = 16, height = 16)
 
     if(length(grl1)==2){
         Cat.dist<- c( 0.01, 0.01)
@@ -107,8 +108,8 @@ peak.venn <- function(files, outpath, date, colors = NULL, connectedPeaks = "mer
                 NameOfPeaks = c(paste(names(lengths(grl1)), lengths(grl1), sep="\n")),
                 cex = Cex,  cat.cex=Cat.cex, 
                 fontface = 2,
-                scaled = FALSE, euler.d = FALSE, totalTest = lengths(grl1) %>% max(), 
-                cat.fontface = 4,
+                scaled = T, euler.d = T, totalTest = lengths(grl1) %>% max(), 
+                cat.fontface = 3,
                 cat.dist = Cat.dist, # Modified
                 cat.pos =  Cat.pos, # Modified
                 connectedPeaks = connectedPeaks,

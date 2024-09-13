@@ -23,12 +23,15 @@ annoGene <- function(peak.gr, promoter = c(-1000, 0)) {
             bind_rows(
                 ref %>% # filter(feature != "mRNA") %>%
                     dplyr::select(seqnames, start, end, strand, geneID, transcript.ID, feature) %>%
-                    distinct()
+                    distinct()%>% 
+                    mutate(feature = ifelse(feature%>% str_detect("exon.1"), "first_exon", 
+                        feature %>% str_remove(".\\d+$") )
+                    )
             ) %>%
-            makeGRangesFromDataFrame(keep.extra.columns = TRUE, starts.in.df.are.0based = T)
+            GenomicRanges::makeGRangesFromDataFrame(keep.extra.columns = TRUE, starts.in.df.are.0based = T)
 
         head(ref.annt)
-        unique(ref.annt$feature)
+        unique(ref.annt$feature)%>% print()
 
         hits <- findOverlaps(ref.annt, peak.gr)
         hits.df <- hits %>%
@@ -36,15 +39,15 @@ annoGene <- function(peak.gr, promoter = c(-1000, 0)) {
             mutate(across(everything(), as.character))
 
         head(hits.df)
+        nrow(hits.df)
         # p <- Pairs(ref.annt, peak.gr, hits = hits)
-
 
         if (nrow(hits.df) != 0) {
             nrow(hits.df)
-            priority <- c("promoter", "five_prime_UTR", "CDS", "three_prime_UTR", "mRNA", "intergenic")
+            priority <- c("promoter", "five_prime_UTR", "first_exon", "exon", "three_prime_UTR", "mRNA", "intergenic")
             res <- hits.df %>%
-                left_join(peak.gr %>% as.data.frame() %>% rownames_to_column(var = "subjectHits")) %>%
-                left_join(ref.annt %>% as.data.frame() %>% rownames_to_column(var = "queryHits") %>%
+                left_join(peak.gr %>% as.data.frame() %>% mutate(start=start-1 ) %>% rownames_to_column(var = "subjectHits")) %>%
+                left_join(ref.annt %>% as.data.frame() %>% mutate(start=start-1 ) %>% rownames_to_column(var = "queryHits") %>%
                     dplyr::rename(gene.start = start, gene.end = end, Strand = strand, gene.width = width)) %>%
                 dplyr::select(-c(queryHits, subjectHits)) %>%
                 mutate(peakID = paste(seqnames, start, end, sep = "__")) %>%
@@ -60,9 +63,11 @@ annoGene <- function(peak.gr, promoter = c(-1000, 0)) {
 
             head(res %>% as.data.frame())
             nrow(res)
+            unique(res$feature)%>% print()
+
 
             unalign <- peak.gr %>%
-                as.data.frame() %>%
+                as.data.frame() %>% mutate(start=start-1 ) %>%
                 rownames_to_column(var = "subjectHits") %>%
                 filter(!subjectHits %in% hits.df$subjectHits) %>%
                 distinct() %>%
@@ -70,7 +75,7 @@ annoGene <- function(peak.gr, promoter = c(-1000, 0)) {
             head(unalign)
             nrow(unalign)
 
-            priority <- c("promoter", "five_prime_UTR", "CDS", "three_prime_UTR", "intron", "intergenic")
+            priority <- c("promoter", "five_prime_UTR", "first_exon", "exon", "three_prime_UTR", "intron", "intergenic")
 
             feature.count <- data.frame(
                 feature = "intergenic",
