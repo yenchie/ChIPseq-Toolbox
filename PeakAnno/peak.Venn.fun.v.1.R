@@ -17,7 +17,7 @@
 library(ChIPpeakAnno)
 library(tidyverse)
 
-peak.venn <- function(files, outpath, date, colors = NULL, connectedPeaks = "merge", outname= outname) {
+peak.venn <- function(files, outpath, date, colors = NULL, connectedPeaks = "merge", outname= "outname") {
     print(outpath)
     print(outname)
     ## input -----
@@ -74,7 +74,7 @@ peak.venn <- function(files, outpath, date, colors = NULL, connectedPeaks = "mer
     }
 
     print(file.path(outpath, paste0("peak.venn.", date, ".pdf")))
-    pdf(file.path(outpath, paste0(outname, ".peak.venn.", date, ".pdf")), width = 16, height = 16)
+    pdf(file.path(outpath, paste0(outname, ".peak.venn.", date, ".pdf")), width = 18, height = 18)
 
     if(length(grl1)==2){
         Cat.dist<- c( 0.01, 0.01)

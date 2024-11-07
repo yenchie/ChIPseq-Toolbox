@@ -17,7 +17,7 @@ plotanntBar <- function(annoPeakList) {
     level <- c("promoter", "five_prime_UTR", "first_exon", "exon", "intron", "three_prime_UTR", "intergenic")
     col <- c(
         "#A6CEE3",
-        "#1F78B4", "#33A02C", "#133111", "#E31A1C",
+        "#1F78B4", "#33A02C", "#076900", "#E31A1C",
         "#FF7F00", "#CAB2D6"
     )
 

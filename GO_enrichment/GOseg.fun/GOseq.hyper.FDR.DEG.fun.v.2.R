@@ -76,7 +76,7 @@ require(ggplot2)
 # source((source.path %>% list.dirs() %>% list.files("GOseq.ego.fun.v.1.R", full.names = T)))
 
 
-GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.path, q.cut.off=0.05) {
+GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.path, q.cut.off = 0.05) {
   # if(q.cut.off%>% is.null()){
   #   q.cut.off<-0.05
   # }
@@ -187,15 +187,39 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
     q.cut.of <- q.cut.off
     BP <- GO.seq.ego(pwf, GO_BP, termfile = termfile, q.cut.of)
     outpath <- file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id$", paste0("_DAG.BP", q.cut.of, ".pdf"))))
-    DAG.GOseq.fun(GOseq.result = BP$ego, GO_DB = GO_BP, GO.ontology = "BP", termfile, GOI.list = de.genes$V1, q.cut.off = q.cut.of, outpath = outpath)
+    tryCatch(
+      {
+        DAG.GOseq.fun(GOseq.result = BP$ego, GO_DB = GO_BP, GO.ontology = "BP", termfile, GOI.list = de.genes$V1, q.cut.off = q.cut.of, outpath = outpath)
+      },
+      error = function(e) {
+        message("An error occurred: ", e$message)
+      }
+    )
+
 
     CC <- GO.seq.ego(pwf, GO_CC, termfile = termfile, q.cut.of)
     outpath <- file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id$", paste0("_DAG.CC", q.cut.of, ".pdf"))))
-    DAG.GOseq.fun(CC$ego, GO_CC, "CC", termfile, GOI.list = de.genes$V1, q.cut.off = q.cut.of, outpath = outpath)
+    tryCatch(
+      {
+        DAG.GOseq.fun(CC$ego, GO_CC, "CC", termfile, GOI.list = de.genes$V1, q.cut.off = q.cut.of, outpath = outpath)
+      },
+      error = function(e) {
+        message("An error occurred: ", e$message)
+      }
+    )
+
 
     MF <- GO.seq.ego(pwf, GO_MF, termfile = termfile, q.cut.of)
     outpath <- file.path(datapath, "output", "plot", paste0(i %>% basename() %>% str_replace("\\.id$", paste0("_DAG.MF", q.cut.of, ".pdf"))))
-    DAG.GOseq.fun(MF$ego, GO_MF, "MF", termfile, GOI.list = de.genes$V1, q.cut.off = q.cut.of, outpath = outpath)
+    tryCatch(
+      {
+        DAG.GOseq.fun(MF$ego, GO_MF, "MF", termfile, GOI.list = de.genes$V1, q.cut.off = q.cut.of, outpath = outpath)
+      },
+      error = function(e) {
+        message("An error occurred: ", e$message)
+      }
+    )
+
 
     # mix table into one.
     enriched.go.BP <- BP$fin.result
@@ -244,11 +268,12 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
         read.delim(
           name,
           stringsAsFactors = F
-        ) %>% arrange(FDR)%>%
+        ) %>%
+        arrange(FDR) %>%
         na.omit() %>%
         mutate(log10.qval = -log10(FDR)) %>%
         filter(!log10.qval %>% is.infinite()) %>%
-        filter(log10.qval > -log10(0.05) )%>%
+        filter(log10.qval > -log10(q.cut.of)) %>%
         mutate(
           Description = Description %>% str_wrap(width = 40),
           GeneRatio = geneHits * 100 / pathGenes
@@ -260,7 +285,7 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
       print(min(d1$log10.qval))
       print(max(d1$log10.qval))
 
-      p1 <- d1  %>%
+      p1 <- d1 %>%
         group_by(Ontology) %>%
         top_n(10, wt = log10.qval) %>%
         ungroup() %>%
@@ -301,7 +326,7 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
       d2 <- NULL
       for (ont in d1$Ontology %>% unique()) {
         d2 <- d1 %>% # na.omit()%>%
-          filter(Ontology == ont) 
+          filter(Ontology == ont)
 
         print(min(d2$log10.qval))
 
@@ -352,7 +377,7 @@ GOseq.hyper.FDR.DEG.fun <- function(datapath, GO.path, termfile.path, all.genes.
       print(paste("No GO terms were enriched in the file:", i))
     }
   }
-  
+
   print("GO enrichment analysis has been completed for all files.")
   Sys.sleep(5)
 }

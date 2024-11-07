@@ -67,6 +67,11 @@ GO.seq.ego <- function(pwf, GO_DB, termfile = termfile, q.cut.off) {
     GOIs <- length(which(GOI.list %in% GO_DB$geneID))
     print(GOIs)
 
+    if(GOIs ==0 ){
+        return(NULL)
+        quit("GOIs is 0, exiting the GOseq analysis")
+    }
+
     ego <- goseq(pwf, gene2cat = GO_DB, method = "Hypergeometric", use_genes_without_cat = T) # Wallenius
     head(ego, n = 10)
     ego$qval <- p.adjust(ego$over_represented_pvalue, method = "BH")
@@ -170,6 +175,11 @@ GO.seq.ego <- function(pwf, GO_DB, termfile = termfile, q.cut.off) {
 }
 DAG.GOseq.fun <- function(GOseq.result, GO_DB, GO.ontology, termfile, GOI.list, q.cut.off, outpath = outpath) {
     print(GO.ontology)
+
+    if( GOseq.result %>% is.null() ){
+        stop("GOseq.result is.null, exiting the GOseq analysis")
+    }
+    
     GO_DB$Ontology %>% unique()
     GOseq.result$ontology %>% unique()
 
@@ -192,6 +202,8 @@ DAG.GOseq.fun <- function(GOseq.result, GO_DB, GO.ontology, termfile, GOI.list, 
     GOIs <- GOI.list[which(GOI.list %in% genes)]
     print(GOIs %>%
         length())
+
+  
 
     # GOseq.result %>% head()
     GOseq.result.1 <- GOseq.result %>%
